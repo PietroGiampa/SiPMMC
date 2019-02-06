@@ -111,6 +111,10 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   rnd.SetSeed(seed);
   rndCDP.SetSeed(seed);
   
+  //Define the Bounderies for reconstructed PSD
+  double low_int_bound = time_trigger-4.0;
+  double high_int_bound = time_trigger+86.0;
+
   //Define Ntuple TTree
   //Write output
   TString num = Form("%d",evt_max);
@@ -122,18 +126,19 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   TFile *fout = TFile::Open(filename,"recreate");
   
   int ievt, n_scint_p, n_coll_p;
-  double epsd, erecoil, u_pr;
+  double epsd, erecoil, u_pr, rpsd;
   vector<double> pht_wl;
   vector<double> pht_st;
   TTree *SiPMmc = new TTree("SiPMmc","SiPM LAr Simulation");
   SiPMmc->Branch("ievt",&ievt);
   SiPMmc->Branch("epsd",&epsd);
+  SiPMmc->Branch("rpsd",&rpsd);
   SiPMmc->Branch("u_pr",&u_pr);
   SiPMmc->Branch("erecoil",&erecoil);
   SiPMmc->Branch("n_scint_p",&n_scint_p);
   SiPMmc->Branch("n_coll_p",&n_coll_p);
-  SiPMmc->Branch("pht_st",&pht_st);
-  SiPMmc->Branch("pht_wl",&pht_wl);
+  //SiPMmc->Branch("pht_st",&pht_st);
+  //SiPMmc->Branch("pht_wl",&pht_wl);
   //--------------------------------------------------------------------//
   // Stage 2, Event by Event simmulation                                //
   //--------------------------------------------------------------------//
@@ -150,7 +155,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 
       //Generate a reoil energy for the even
       //Randomly distributed between 5 and 32 keV
-      erecoil = rnd.Uniform(5.0,32.0);
+      erecoil = rnd.Uniform(5.0,15.0);
       
       //Generate the true PSD for this event
       if (evt_type=="NR")
@@ -291,6 +296,17 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 	    }//end for-loop
 	}//end if-else
 
+      //Estimate the Reconstructed PSD after the SiPM WF Simulation
+      double rec_prompt_count = 0.0;
+      double rec_full_count = 0.0;
+      for (int kk=0; kk<pht_st..size(); kk++) 
+	{
+	  double single_pulse_time = pht_st.at(kk);
+	  if (single_pulse_time>=low_int_bound && single_pulse_time<=high_int_bound){rec_prompt_count++;}
+	  if (single_pulse_time>=low_int_bound){rec_full_count++;}
+	}//end of kk-loop
+      rpsd = rec_prompt_count/rec_full_count;//estimate reconstructed PSD
+      
       //Fill TTree
       SiPMmc->Fill();
             

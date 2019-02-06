@@ -299,7 +299,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
       //Estimate the Reconstructed PSD after the SiPM WF Simulation
       double rec_prompt_count = 0.0;
       double rec_full_count = 0.0;
-      for (int kk=0; kk<pht_st..size(); kk++) 
+      for (int kk=0; kk<pht_st.size(); kk++) 
 	{
 	  double single_pulse_time = pht_st.at(kk);
 	  if (single_pulse_time>=low_int_bound && single_pulse_time<=high_int_bound){rec_prompt_count++;}

@@ -4,7 +4,7 @@
 
 TH1D* SiPMcdrHist()
 {
-  TFile *fin = TFile::Open("Data/rate.root");
+  TFile *fin = TFile::Open("rate.root");
   TH1D *hCDR = (TH1D*)fin->Get("HRate40");
   
   return hCDR;

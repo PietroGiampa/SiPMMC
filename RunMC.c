@@ -16,6 +16,7 @@
 #include "LArEmissionSpectrum.c"
 #include "SiPMcdrPDF.c"
 #include "SiPMcdrHist.c"
+#include "GetPDEAsString.c"
 #include "SiPMTimeResolution.c"
 #include "SingletToTripletFunction.c"
 #include "SingletToTripletYALE.c"
@@ -119,10 +120,11 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   //Write output
   TString num = Form("%d",evt_max);
   TString nSeed = Form("S%d",seed);
+  TString name_pde = GetPDEAsString(pde);
   TString tpb = "";
   if (IsTPBon==1){tpb="TPBon";}
   else if (IsTPBon==0){tpb="TPBoff";}
-  TString filename = "Data/SiPM_"+num+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
+  TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
   TFile *fout = TFile::Open(filename,"recreate");
   
   int ievt, n_scint_p, n_coll_p;

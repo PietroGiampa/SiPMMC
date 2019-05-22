@@ -1,4 +1,4 @@
-//Define The Noise Cooreated Pdf based on Fabrices paper
+//Define The Correlated Noise PDF based on Fabrice's paper
 //This is extracted for the VUV4
 //https://arxiv.org/abs/1703.06204
 
@@ -11,5 +11,5 @@ Double_t SiPMcdpPDF(Double_t *x, Double_t *par)
   Double_t CDP_DN = par[5];
   Double_t CDP = CDP_gaus + CDP_exp + CDP_DN;
   return CDP;
-  
+
 }

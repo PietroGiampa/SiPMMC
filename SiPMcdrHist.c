@@ -1,4 +1,4 @@
-//Define The Noise Cooreated Pdf based on Fabrices paper
+//Define The Correlated Noise PDF based on Fabrice's paper
 //This is extracted for the VUV4
 //https://arxiv.org/abs/1703.06204
 

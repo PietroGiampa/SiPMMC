@@ -21,7 +21,7 @@
 3) SiPMTimeResolution.c
 4) SiPMcdrHist.c
 5) SiPMcdrPDF.c
-6) SingletToTripletFuntion.c
+6) SingletToTripletFunction.c
 7) SingletToTripletSCENE.c
 8) SingletToTripletYALE.c
 

@@ -130,9 +130,9 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
   TFile *fout = TFile::Open(filename,"recreate");
 
-  //I think this is defining variables for the next section?
-  int ievt, n_scint_p, n_coll_p; //evt: event?; scint: scintillation; coll: collision?
-  double epsd, erecoil, u_pr, rpsd; // what do these variable names stand for?
+  //defining variables for the next section
+  int ievt, n_scint_p, n_coll_p; //ievt: event number; scint: scintillation; coll: collected
+  double epsd, erecoil, u_pr, rpsd; // erecoil: recoil energy
   vector<double> pht_wl; //pulse vector
   vector<double> pht_st; //pulse vector
   TTree *SiPMmc = new TTree("SiPMmc","SiPM LAr Simulation");
@@ -160,7 +160,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
       if ((ievt%500)==0) {cout << "Event: " << ievt << " out of " << evt_max << endl;}
 
       //Generate a recoil energy for the event
-      //Randomly distributed between 5 and 32 keV
+      //Randomly distributed between energy_min and energy_max
       erecoil = rnd.Uniform(energy_min,energy_max);
 
       //Generate the true PSD for this event
@@ -191,16 +191,16 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
       int n_fast_p = n_coll_p*epsd; // number of prompt photon, based on gen PSD
 
       //Loop through all the generated photons
-      //to assign a given wavelength and a emission time
+      //to assign a given wavelength and an emission time
       for (int ipht=0; ipht<n_coll_p; ipht++)
 	{
-	  //Define some basic variable for definition loop
+	  //Define some basic variables for definition loop
 	  double gp_wl=1.0;
 	  double ep_wl=0.0;
 	  double gp_st=1.0;
 	  double ep_st=0.0;
-	  double wl=0.0;
-	  double st=0.0;
+	  double wl=0.0; //wavelength
+	  double st=0.0; //singlet triplet?
 
 	  //First off, assign a scintillation wavelength to the photon
 	  //Based on the constructed emission spectrum
@@ -209,19 +209,19 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 	  //Assign the emission time to each photon
 	  //ratio of single to triplet is selected based
 	  //on the simulated true PSD
-	  double st_ratio = rnd.Uniform(0.0,1.0);
+	  double st_ratio = rnd.Uniform(0.0,1.0); //singlet triplet ratio?
 	  if (st_ratio<=epsd){st = fastPDF->GetRandom();}
 	  else if (st_ratio>epsd){st = slowPDF->GetRandom();}
 
-	  //If TPB is applied to the detoector
+	  //If TPB is applied to the detector
 	  //Absorb and re-emit the photons based on
 	  //Segreto's measurement
 	  if (IsTPBon==1){
 	    double tpb_emi_prob = rnd.Uniform(0.0,1.0);
-	    if (tpb_emi_prob<=0.6){st += fastTPB->GetRandom();}
-	    if (tpb_emi_prob>0.6 && tpb_emi_prob<=0.9){st += intTPB->GetRandom();}
-	    if (tpb_emi_prob>0.9 && tpb_emi_prob<=0.98){st += longTPB->GetRandom();}
-	    if (tpb_emi_prob>0.98 && tpb_emi_prob<=1.0){st += spuTPB->GetRandom();}
+	    if (tpb_emi_prob<=TPB_fast_r){st += fastTPB->GetRandom();}
+	    if (tpb_emi_prob>TPB_fast_r && tpb_emi_prob<=(TPB_int_r+TPB_fast_r){st += intTPB->GetRandom();}
+	    if (tpb_emi_prob>TPB_int_r+TPB_fast_r && tpb_emi_prob<=TPB_long_r+TPB_int_r+TPB_fast_r){st += longTPB->GetRandom();}
+	    if (tpb_emi_prob>TPB_long_r+TPB_int_r+TPB_fast_r && tpb_emi_prob<=1.0){st += spuTPB->GetRandom();}
 	  }
 
 	  //if(ipht<=n_fast_p){st = fastPDF->GetRandom();}

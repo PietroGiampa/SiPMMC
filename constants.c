@@ -7,10 +7,10 @@ double TPB_fast_t = 10.0; //TPB Fast time constant [ns]
 double TPB_int_t = 49.0; //TPB intermediate time constant [ns]
 double TPB_long_t = 3550.0; //TPB long time constant [ns]
 double TPB_spu_t = 309.0; //TPB spurious time constant [ns]
-double TPB_fast_r = 60.0; //abundance percentage
-double TPB_int_r = 30.0; //abundance percentage
-double TPB_long_r = 8.0; //abundance percentage
-double TPB_spu_r = 2.0; //abundance percentage
+double TPB_fast_r = 0.6; //abundance
+double TPB_int_r = 0.3; //abundance
+double TPB_long_r = 0.08; //abundance
+double TPB_spu_r = 0.02; //abundance (abundances should add up to 1)
 TRandom3 rnd;
 TRandom3 rndCDP;
 double overvoltage = 4.0; //Set the SiPM overvoltage [V]

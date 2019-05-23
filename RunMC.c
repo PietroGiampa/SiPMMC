@@ -4,7 +4,8 @@
 //---------------------------------------//
 //---------------------------------------//
 // How to run the MC:                    //
-//   1) int IsTPBon, set if there is TPB //
+//   1) int IsTPBon, set to 1 if there   //
+//      is TPB, 0 if there is not        //
 //   2) int evt_max, set n of sim event  //
 //   3) TString evt_type: NR or ER       //
 //                                       //
@@ -89,8 +90,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   SiPMCDP->SetParameter(3,0.05);
   SiPMCDP->SetParameter(4,100);
   TH1D *hCDP = SiPMcdpHist();
-  //tw: time window; h, hist: histogram
-  int tw_bin = hCDP->GetXaxis()->FindBin(time_window-time_trigger);
+  int tw_bin = hCDP->GetXaxis()->FindBin(time_window-time_trigger); //tw: time window; h, hist: histogram
   double cdp_rate = hCDP->Integral(0,tw_bin)/1E9;
 
   //Set Up DarkNoise ranges
@@ -108,19 +108,20 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   //of singlet and triplet based on YALE paper
   TGraphErrors *gNR = SingletToTripletYALE("NR");
   TGraphErrors *gNRs = SingletToTripletSCENE("NR");
-  TGraphErrors *gER = SingletToTripletYALE("ER");  
+  TGraphErrors *gER = SingletToTripletYALE("ER");
 
   //Set Simulation SEED
+  TRandom3 rnd
   rnd.SetSeed(seed);
   rndCDP.SetSeed(seed);
 
-  //Define the Bounderies for reconstructed PSD
+  //Define the Boundaries for reconstructed PSD
   double low_int_bound = time_trigger-4.0;
   double high_int_bound = time_trigger+86.0;
 
   //Define Ntuple TTree
   //Write output
-  TString num = Form("%d",evt_max);
+  TString num = Form("%d",evt_max); //TString::Form formats a string
   TString nSeed = Form("S%d",seed);
   TString name_pde = GetPDEAsString(pde);
   TString tpb = "";
@@ -129,12 +130,11 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
   TFile *fout = TFile::Open(filename,"recreate");
 
-  //evt: event?; scint: scintillation; coll: collision?
-  int ievt, n_scint_p, n_coll_p;
-  // what do these variable names stand for?
-  double epsd, erecoil, u_pr, rpsd;
-  vector<double> pht_wl;
-  vector<double> pht_st;
+  //I think this is defining variables for the next section?
+  int ievt, n_scint_p, n_coll_p; //evt: event?; scint: scintillation; coll: collision?
+  double epsd, erecoil, u_pr, rpsd; // what do these variable names stand for?
+  vector<double> pht_wl; //pulse vector
+  vector<double> pht_st; //pulse vector
   TTree *SiPMmc = new TTree("SiPMmc","SiPM LAr Simulation");
   SiPMmc->Branch("ievt",&ievt);
   SiPMmc->Branch("epsd",&epsd);
@@ -161,7 +161,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 
       //Generate a recoil energy for the event
       //Randomly distributed between 5 and 32 keV
-      erecoil = rnd.Uniform(5.0,15.0);
+      erecoil = rnd.Uniform(energy_min,energy_max);
 
       //Generate the true PSD for this event
       if (evt_type=="NR")
@@ -243,7 +243,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 	      pht_wl.push_back(wl);
 	      pht_st.push_back(st);
 	    }//see-loop
-	}//end of ipht-loop  
+	}//end of ipht-loop
 
       //--------------------------------------------------------------------//
       // Stage 3, Add Coorelated Noise and DN                               //

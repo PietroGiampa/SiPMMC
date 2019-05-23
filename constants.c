@@ -21,4 +21,6 @@ double time_full_window = time_window+time_trigger; //DAQ full window [ns]
 //double pdePDF = 0.2; //PDE for the SIPM, assumed to be flat between 100-300 [nm]
 double DN_rate = 0.08; //Hz/mm2
 double n_SiPM = 216; //number of SiPM in the experiment
-double SiPM_A = 25; //mm2
+double SiPM_A = 25; //area in mm2
+double energy_min = 4.0 //minimum event energy in keV
+double energy_max = 30.0 //maximum event energy in keV

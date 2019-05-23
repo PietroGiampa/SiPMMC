@@ -1,0 +1,15 @@
+CDR: Correlated Dark Rate
+CDP: Correlated Delayed Pulse
+DAQ: Data Aquisition
+DN: Dark Noise
+ER: Electronic Recoil
+int: intermediate (or integer)
+LAr: Liquid Argon
+MC: Monte Carlo
+NR: Nuclear Recoil
+PDE: Photon Detection Efficiency of SiPMs
+PDF: Probability Density Function
+PSD: Pulse Shape Discrimination
+SiPM: Silicon Photomultiplier
+spu: spurious
+TPB: Tetraphenyl-Butadiene wavelength shifter

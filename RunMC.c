@@ -24,7 +24,7 @@
 
 void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 {
-  
+
   //--------------------------------------------------------------------//
   // Stage 1, Set Up                                                    //
   //--------------------------------------------------------------------//
@@ -62,7 +62,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   slowPDF->SetParameter(1,LAr_slow_t);
 
   //Standard function for the TPB re-emission time constant.
-  //This is model for 4 different time constans as model by the
+  //This is model for 4 different time constants as modelled by the
   //Segreto paper:https://arxiv.org/abs/1411.4524
   TF1 *fastTPB = new TF1("fastTPB",DecayFunction,0,time_window,2);
   fastTPB->SetParameter(0,1.0);
@@ -76,11 +76,11 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   TF1 *spuTPB = new TF1("spuTPB",DecayFunction,0,time_window,2);
   spuTPB->SetParameter(0,1.0);
   spuTPB->SetParameter(1,TPB_spu_t);
-  
+
   //Set the SiPM correlated delayed pulse PDF
   //This is based on the following paper:
   //https://arxiv.org/abs/1703.06204
-  TF1 *SiPMCDP = new TF1("SiPMCDP",SiPMcdpPDF,0,6000,6);
+  TF1 *SiPMCDP = new TF1("SiPMCDP",SiPMcdrPDF,0,6000,6);
   SiPMCDP->SetParameter(5,0.005);
   SiPMCDP->SetParameter(0,1.0);
   SiPMCDP->SetParameter(1,22);
@@ -88,12 +88,13 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   SiPMCDP->SetParameter(3,0.05);
   SiPMCDP->SetParameter(4,100);
   TH1D *hCDP = SiPMcdrHist();
+  //tw: time window; h, hist: histogram
   int tw_bin = hCDP->GetXaxis()->FindBin(time_window-time_trigger);
   double cdp_rate = hCDP->Integral(0,tw_bin)/1E9;
 
   //Set Up DarkNoise ranges
   double final_DN_rate = (DN_rate*n_SiPM*SiPM_A/1E9)*time_window;
-  
+
   //Set up time response function for the SiPM
   //This is a bit of a SiPM/DAQ related function
   //Smearing to the original "arrival time"
@@ -111,7 +112,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   //Set Simulation SEED
   rnd.SetSeed(seed);
   rndCDP.SetSeed(seed);
-  
+
   //Define the Bounderies for reconstructed PSD
   double low_int_bound = time_trigger-4.0;
   double high_int_bound = time_trigger+86.0;
@@ -126,8 +127,10 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   else if (IsTPBon==0){tpb="TPBoff";}
   TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
   TFile *fout = TFile::Open(filename,"recreate");
-  
+
+  //evt: event?; scint: scintillation; coll: collision?
   int ievt, n_scint_p, n_coll_p;
+  // what do these variable names stand for?
   double epsd, erecoil, u_pr, rpsd;
   vector<double> pht_wl;
   vector<double> pht_st;
@@ -150,15 +153,15 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 
       //Clear Pulse Vector
       pht_wl.clear();
-      pht_st.clear();      
-      
+      pht_st.clear();
+
       //Printout progress in simulation
       if ((ievt%500)==0) {cout << "Event: " << ievt << " out of " << evt_max << endl;}
 
-      //Generate a reoil energy for the even
+      //Generate a recoil energy for the event
       //Randomly distributed between 5 and 32 keV
       erecoil = rnd.Uniform(5.0,15.0);
-      
+
       //Generate the true PSD for this event
       if (evt_type=="NR")
 	{
@@ -169,7 +172,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
       if (evt_type=="ER")
 	{
 	  u_pr = gER->Eval(erecoil);
-	  ERfunc->SetParameter(2,u_pr);	  
+	  ERfunc->SetParameter(2,u_pr);
 	  epsd = ERfunc->GetRandom()*0.01;
 	}
 
@@ -179,13 +182,13 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
       n_scint_p = erecoil*photo_yield;
 
       //Account for detector collection efficiency
-      //THis can be changed for different experiments
+      //This can be changed for different experiments
       n_coll_p = n_scint_p*coll_eff;
 
-      //Define Phtons vectors
+      //Define Photons vectors
       //Plus define other variables
-      int n_fast_p = n_coll_p*epsd; // number of prompt photon, based on gen PSD    
-      
+      int n_fast_p = n_coll_p*epsd; // number of prompt photon, based on gen PSD
+
       //Loop through all the generated photons
       //to assign a given wavelength and a emission time
       for (int ipht=0; ipht<n_coll_p; ipht++)
@@ -198,19 +201,19 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 	  double wl=0.0;
 	  double st=0.0;
 
-	  //First off assign a scintillation wavelength to the photon
-	  //Basede on theconstructed emission spectrumm
+	  //First off, assign a scintillation wavelength to the photon
+	  //Based on the constructed emission spectrum
 	  wl = LArEmission->GetRandom();
 
 	  //Assign the emission time to each photon
-	  //ratio of single to triplet is slected based
+	  //ratio of single to triplet is selected based
 	  //on the simulated true PSD
 	  double st_ratio = rnd.Uniform(0.0,1.0);
 	  if (st_ratio<=epsd){st = fastPDF->GetRandom();}
 	  else if (st_ratio>epsd){st = slowPDF->GetRandom();}
 
 	  //If TPB is applied to the detoector
-	  //Absorbe and re-emit the photons based on
+	  //Absorb and re-emit the photons based on
 	  //Segreto's measurement
 	  if (IsTPBon==1){
 	    double tpb_emi_prob = rnd.Uniform(0.0,1.0);
@@ -263,32 +266,32 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 	      if (gen_p<poisson || n==0){break;}
 	      n--;
 	    }//end while-loop
-	    
+
 	  if (n==0){continue;}
 	  else if (n>0)
 	    {
 	      for (int ap=0; ap<n; ap++)
 		{
-		  
+
 		  double ap_time = pp_time + hCDP->GetRandom();
 		  pht_st.push_back(ap_time);
 		}//end for loop
-	    }//end if-else loop	  
-	}//end of icdp-loop 
+	    }//end if-else loop
+	}//end of icdp-loop
       //--------------------------------------------------------------------//
       // Add Dark Noise                                                     //
-      //--------------------------------------------------------------------// 
+      //--------------------------------------------------------------------//
       int n_dn = 5;
       double p_dn = rndCDP.Uniform(0.0000,1.0000);
       double poisson_dn = 1.0;
-      
+
       while(1)
 	{
 	  poisson_dn = TMath::Poisson(n_dn,final_DN_rate);
 	  if (p_dn<poisson_dn || n_dn==0){break;}
 	  n_dn--;
 	}//end while-loop
-      
+
       if (n_dn>0)
 	{
 	  for (int dn=0; dn<n_dn; dn++)
@@ -301,21 +304,21 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
       //Estimate the Reconstructed PSD after the SiPM WF Simulation
       double rec_prompt_count = 0.0;
       double rec_full_count = 0.0;
-      for (int kk=0; kk<pht_st.size(); kk++) 
+      for (int kk=0; kk<pht_st.size(); kk++)
 	{
 	  double single_pulse_time = pht_st.at(kk);
 	  if (single_pulse_time>=low_int_bound && single_pulse_time<=high_int_bound){rec_prompt_count++;}
 	  if (single_pulse_time>=low_int_bound){rec_full_count++;}
 	}//end of kk-loop
       rpsd = rec_prompt_count/rec_full_count;//estimate reconstructed PSD
-      
+
       //Fill TTree
       SiPMmc->Fill();
-            
+
     }//end of ievt-loop
-  
+
   //Write output
   SiPMmc->Write();
   fout->Close();
-  
+
 }//end void

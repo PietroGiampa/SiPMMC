@@ -1,4 +1,3 @@
-CDR: Correlated Dark Rate
 CDP: Correlated Delayed Pulse
 DAQ: Data Aquisition
 DN: Dark Noise

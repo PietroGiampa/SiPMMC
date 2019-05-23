@@ -19,8 +19,8 @@
 1) DecayFunction.c
 2) LArEmissionSpectrum.c
 3) SiPMTimeResolution.c
-4) SiPMcdrHist.c
-5) SiPMcdrPDF.c
+4) SiPMcdpHist.c
+5) SiPMcdpPDF.c
 6) SingletToTripletFunction.c
 7) SingletToTripletSCENE.c
 8) SingletToTripletYALE.c

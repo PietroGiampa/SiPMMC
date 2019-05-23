@@ -1,6 +1,7 @@
-//-----------------------------//
-// Pietro Giampa, TRIUMF, 2018 //
-//-----------------------------//
+//---------------------------------------//
+// Pietro Giampa, TRIUMF, 2018           //
+// Edited by Frankie Polak, TRIUMF, 2019 //
+//---------------------------------------//
 //---------------------------------------//
 // How to run the MC:                    //
 //   1) int IsTPBon, set if there is TPB //
@@ -14,8 +15,8 @@
 #include "constants.c"
 #include "DecayFunction.c"
 #include "LArEmissionSpectrum.c"
-#include "SiPMcdrPDF.c"
-#include "SiPMcdrHist.c"
+#include "SiPMcdpPDF.c"
+#include "SiPMcdpHist.c"
 #include "GetPDEAsString.c"
 #include "SiPMTimeResolution.c"
 #include "SingletToTripletFunction.c"
@@ -80,14 +81,14 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   //Set the SiPM correlated delayed pulse PDF
   //This is based on the following paper:
   //https://arxiv.org/abs/1703.06204
-  TF1 *SiPMCDP = new TF1("SiPMCDP",SiPMcdrPDF,0,6000,6);
+  TF1 *SiPMCDP = new TF1("SiPMCDP",SiPMcdpPDF,0,6000,6);
   SiPMCDP->SetParameter(5,0.005);
   SiPMCDP->SetParameter(0,1.0);
   SiPMCDP->SetParameter(1,22);
   SiPMCDP->SetParameter(2,10);
   SiPMCDP->SetParameter(3,0.05);
   SiPMCDP->SetParameter(4,100);
-  TH1D *hCDP = SiPMcdrHist();
+  TH1D *hCDP = SiPMcdpHist();
   //tw: time window; h, hist: histogram
   int tw_bin = hCDP->GetXaxis()->FindBin(time_window-time_trigger);
   double cdp_rate = hCDP->Integral(0,tw_bin)/1E9;

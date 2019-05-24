@@ -24,7 +24,7 @@
 #include "SingletToTripletYALE.c"
 #include "SingletToTripletSCENE.c"
 
-void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
+void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
 {
 
   //--------------------------------------------------------------------//
@@ -111,7 +111,6 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
   TGraphErrors *gER = SingletToTripletYALE("ER");
 
   //Set Simulation SEED
-  TRandom3 rnd
   rnd.SetSeed(seed);
   rndCDP.SetSeed(seed);
 
@@ -200,7 +199,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 	  double gp_st=1.0;
 	  double ep_st=0.0;
 	  double wl=0.0; //wavelength
-	  double st=0.0; //singlet triplet?
+	  double st=0.0; //emission time
 
 	  //First off, assign a scintillation wavelength to the photon
 	  //Based on the constructed emission spectrum
@@ -246,7 +245,7 @@ void RunMC(int evt_max, int IsTPBon, double pde, int seed, TString evt_type)
 	}//end of ipht-loop
 
       //--------------------------------------------------------------------//
-      // Stage 3, Add Coorelated Noise and DN                               //
+      // Stage 3, Add Correlated Noise and DN                               //
       //--------------------------------------------------------------------//
       //--------------------------------------------------------------------//
       // Add CDP pulses                                                     //

@@ -4,9 +4,9 @@
 //---------------------------------------//
 //---------------------------------------//
 // How to run the MC:                    //
-//   1) int IsTPBon, set to 1 if there   //
+//   1) int evt_max, set n of sim event  //
+//   2) int IsTPBon, set to 1 if there   //
 //      is TPB, 0 if there is not        //
-//   2) int evt_max, set n of sim event  //
 //   3) TString evt_type: NR or ER       //
 //                                       //
 // root -l 'RunMC(0)'                    //
@@ -217,10 +217,10 @@ void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
 	  //Segreto's measurement
 	  if (IsTPBon==1){
 	    double tpb_emi_prob = rnd.Uniform(0.0,1.0);
-	    if (tpb_emi_prob<=TPB_fast_r){st += fastTPB->GetRandom();}
-	    if (tpb_emi_prob>TPB_fast_r && tpb_emi_prob<=(TPB_int_r+TPB_fast_r){st += intTPB->GetRandom();}
-	    if (tpb_emi_prob>TPB_int_r+TPB_fast_r && tpb_emi_prob<=TPB_long_r+TPB_int_r+TPB_fast_r){st += longTPB->GetRandom();}
-	    if (tpb_emi_prob>TPB_long_r+TPB_int_r+TPB_fast_r && tpb_emi_prob<=1.0){st += spuTPB->GetRandom();}
+	    if (tpb_emi_prob <= TPB_fast_r){st += fastTPB->GetRandom();}
+	    if (tpb_emi_prob > TPB_fast_r && tpb_emi_prob <= (TPB_int_r+TPB_fast_r)){st += intTPB->GetRandom();}
+	    if (tpb_emi_prob > (TPB_int_r+TPB_fast_r) && tpb_emi_prob <= (TPB_long_r+TPB_int_r+TPB_fast_r)){st += longTPB->GetRandom();}
+	    if (tpb_emi_prob > (TPB_long_r+TPB_int_r+TPB_fast_r) && tpb_emi_prob <= 1.0){st += spuTPB->GetRandom();}
 	  }
 
 	  //if(ipht<=n_fast_p){st = fastPDF->GetRandom();}

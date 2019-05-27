@@ -32,4 +32,4 @@ double n_SiPM = 30; //number of SiPMs in the experiment
 double SiPM_A = 25; //area in mm2
 double energy_min = 4.0; //minimum event energy in keV
 double energy_max = 30.0; //maximum event energy in keV
-double SiPMTimeResWidth = 0.5 //std deviation of the gaussian function blurring the SiPM time measurements
+double SiPMTimeResWidth = 0.5; //std deviation of the gaussian function blurring the SiPM time measurements

@@ -1,5 +1,5 @@
 //Define the time response function for the SIPM
-//THis gives you the ability of recording a pulse
+//This gives you the ability of recording a pulse
 //Time spread basically.
 //NEEDS TO BE FIXED
 Double_t SiPMTimeResolution(Double_t *x, Double_t *par)

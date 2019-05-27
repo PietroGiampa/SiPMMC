@@ -102,7 +102,7 @@ void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
   TF1 *SiPMTimeResPDF = new TF1("SiPMTimeResPDF",SiPMTimeResolution,-3,3,3);
   SiPMTimeResPDF->SetParameter(0,1.0);
   SiPMTimeResPDF->SetParameter(1,0.0);
-  SiPMTimeResPDF->SetParameter(2,0.5);
+  SiPMTimeResPDF->SetParameter(2,SiPMTimeResWidth);
 
   //Define TGraphErrorrs for mean Prompt Ratio
   //of singlet and triplet based on YALE paper

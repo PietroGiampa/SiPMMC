@@ -130,10 +130,11 @@ void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
   TFile *fout = TFile::Open(filename,"recreate");
 
   //defining variables for the next section
-  int ievt, n_scint_p, n_coll_p; //ievt: event number; scint: scintillation; coll: collected
+  int ievt, n_scint_p, n_coll_p; //ievt: event number; n_scint_p: number of scintillation photons; n_coll_p: number of collected photons
   double epsd, erecoil, u_pr, rpsd; // erecoil: recoil energy
   vector<double> pht_wl; //pulse vector
   vector<double> pht_st; //pulse vector
+  //defining a TTree
   TTree *SiPMmc = new TTree("SiPMmc","SiPM LAr Simulation");
   SiPMmc->Branch("ievt",&ievt);
   SiPMmc->Branch("epsd",&epsd);
@@ -145,7 +146,7 @@ void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
   //SiPMmc->Branch("pht_st",&pht_st);
   //SiPMmc->Branch("pht_wl",&pht_wl);
   //--------------------------------------------------------------------//
-  // Stage 2, Event by Event simmulation                                //
+  // Stage 2, Event by Event simulation                                //
   //--------------------------------------------------------------------//
   //Loop through all events
   for (int ievt=0; ievt<evt_max; ievt++)

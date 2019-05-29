@@ -131,9 +131,9 @@ void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
 
   //defining variables for the next section
   int ievt, n_scint_p, n_coll_p; //ievt: event number; n_scint_p: number of scintillation photons; n_coll_p: number of collected photons
-  double epsd, erecoil, u_pr, rpsd; // erecoil: recoil energy
-  vector<double> pht_wl; //pulse vector
-  vector<double> pht_st; //pulse vector
+  double epsd, erecoil, u_pr, rpsd; // epsd: expected (true) PSD, erecoil: recoil energy, u_pr: ?, rpsd: recorded PSD (with noise & stuff added)
+  vector<double> pht_wl; //pulse vector? photon wavelength
+  vector<double> pht_st; //pulse vector? phton emission time
   //defining a TTree
   TTree *SiPMmc = new TTree("SiPMmc","SiPM LAr Simulation");
   SiPMmc->Branch("ievt",&ievt);

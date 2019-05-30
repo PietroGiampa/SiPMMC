@@ -4,12 +4,19 @@
 //---------------------------------------//
 //---------------------------------------//
 // How to run the MC:                    //
-//   1) int evt_max, set n of sim event  //
-//   2) int IsTPBon, set to 1 if there   //
+//   1) int IsTPBon, set to 1 if there   //
 //      is TPB, 0 if there is not        //
+//   2) int seed: pick a number between  //
+//      −32,767 and 32,767               //
 //   3) TString evt_type: NR or ER       //
+//   4) edit other simulation parameters //
+//      in constants.c                   //
+//   5) run ReadOutput.c on the data     //
+//      files to graph results           //
+//      -do this before changing         //
+//       constants.c                     //
 //                                       //
-// root -l 'RunMC(0)'                    //
+// root -l 'RunMC(<parameters>)'         //
 //---------------------------------------//
 
 //Include Function
@@ -24,7 +31,7 @@
 #include "SingletToTripletYALE.c"
 #include "SingletToTripletSCENE.c"
 
-void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
+void RunMC(int IsTPBon, int seed, TString evt_type)
 {
 
   //--------------------------------------------------------------------//
@@ -120,7 +127,7 @@ void RunMC(int evt_max, int IsTPBon, int seed, TString evt_type)
 
   //Define Ntuple TTree
   //Write output
-  TString num = Form("%d",evt_max); //TString::Form formats a string
+  TString num = Form("%ld",evt_max); //TString::Form formats a string
   TString nSeed = Form("S%d",seed);
   TString name_pde = GetPDEAsString(pde);
   TString tpb = "";

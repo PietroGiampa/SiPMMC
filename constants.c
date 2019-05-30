@@ -19,16 +19,18 @@ double TPB_spu_r = 0.02; //abundance (abundances should add up to 1)
 double pde = 0.125; //PDE for the Hamamatsu VUV4 SIPM at 189 nm
 double DN_rate = 0.2; //Hz/mm^2, for the Hamamatsu VUV4
 
-// set by user
-double coll_eff = 0.6; //detector collection efficiency [%] - I think this is light coverage
 TRandom3 rnd;
 TRandom3 rndCDP;
+
+// set by user
+long evt_max = 1000; //number of simulated events
+double coll_eff = 1.0; //detector collection efficiency [%] - I think this is light coverage/area coverage of photodetectors
 double overvoltage = 4.0; //Set the SiPM overvoltage [V]
 double time_window = 6000.0; //DAQ recording window [ns]
 double time_trigger = 2000.0; //DAQ Trigger time [ns]
 double time_full_window = time_window+time_trigger; //DAQ full window [ns]
-double n_SiPM = 30; //number of SiPMs in the experiment
-double SiPM_A = 25; //area in mm2
-double energy_min = 4.0; //minimum event energy in keV
+int n_SiPM = 30; //number of SiPMs in the experiment
+double SiPM_A = 25; //area of one SiPM in mm2
+double energy_min = 1.0; //minimum event energy in keV
 double energy_max = 30.0; //maximum event energy in keV
 double SiPMTimeResWidth = 0.5; //std deviation of the gaussian function blurring the SiPM time measurements

@@ -13,8 +13,6 @@
 //      in constants.c                   //
 //   5) run ReadOutput.c on the data     //
 //      files to graph results           //
-//      -do this before changing         //
-//       constants.c                     //
 //                                       //
 // root -l 'RunMC(<parameters>)'         //
 //---------------------------------------//
@@ -136,7 +134,7 @@ void RunMC(int IsTPBon, int seed, TString evt_type)
   TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
   TFile *fout = TFile::Open(filename,"recreate");
 
-  //defining variables for the next section
+  //defining variables to save in the TTree
   int ievt, n_scint_p, n_coll_p; //ievt: event number; n_scint_p: number of scintillation photons; n_coll_p: number of collected photons
   double epsd, erecoil, u_pr, rpsd; // epsd: expected (true) PSD, erecoil: recoil energy, u_pr: ?, rpsd: recorded PSD (with noise & stuff added)
   vector<double> pht_wl; //pulse vector? photon wavelength
@@ -150,6 +148,18 @@ void RunMC(int IsTPBon, int seed, TString evt_type)
   SiPMmc->Branch("erecoil",&erecoil);
   SiPMmc->Branch("n_scint_p",&n_scint_p);
   SiPMmc->Branch("n_coll_p",&n_coll_p);
+  //gather my constants in a structure & save them in a branch
+  struct constant_list {
+    long evts;
+    double eMin;
+    double eMax;
+  };
+  constant_list this_run;
+  this_run.evts = evt_max;
+  this_run.eMin = energy_min;
+  this_run.eMax = energy_max;
+  SiPMmc->Branch("constants", &this_run, "evt_max/L:energy_min/D:energy_max/D");
+  //Pietro wrote this and commented it out, I'm not sure why
   //SiPMmc->Branch("pht_st",&pht_st);
   //SiPMmc->Branch("pht_wl",&pht_wl);
   //--------------------------------------------------------------------//
@@ -163,7 +173,7 @@ void RunMC(int IsTPBon, int seed, TString evt_type)
       pht_wl.clear();
       pht_st.clear();
 
-      //Printout progress in simulation
+      //Print out progress in simulation
       if ((ievt%500)==0) {cout << "Event: " << ievt << " out of " << evt_max << endl;}
 
       //Generate a recoil energy for the event

@@ -1,8 +1,13 @@
 //takes the output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, and recorded PSD vs energy
 
-#include "constants.c"
-
 void ReadOutput(TString filename){
+
+  //define the constants structure
+  struct constant_list {
+    long evts;
+    double eMin;
+    double eMax;
+  };
 
   //read in the data file
   TFile *fileIN = TFile::Open(filename);
@@ -11,15 +16,22 @@ void ReadOutput(TString filename){
   //fetch the necessary stuff from the data file
   Double_t epsd, rpsd, erecoil;
   Int_t n_coll_p;
+  constant_list constants;
   SiPMmc->SetBranchAddress("epsd",&epsd);
   SiPMmc->SetBranchAddress("rpsd",&rpsd);
   SiPMmc->SetBranchAddress("n_coll_p",&n_coll_p);
   SiPMmc->SetBranchAddress("erecoil",&erecoil);
+  SiPMmc->SetBranchAddress("constants", &constants);
+
+  SiPMmc->GetEntry(0);
+  Long_t evt_max = constants.evts;
+  SiPMmc->GetEntry(1);
+  Double_t energy_min = constants.eMin;
+  SiPMmc->GetEntry(2);
+  Double_t energy_max = constants.eMax;
 
   //format file name to use later
-  //remove the directory name
   filename.ReplaceAll("Data/","");
-  //remove the .root
   filename.ReplaceAll(".root","");
 
   //get rid of the stats box

@@ -23,7 +23,7 @@
 #include "LArEmissionSpectrum.c"
 #include "SiPMcdpPDF.c"
 #include "SiPMcdpHist.c"
-#include "GetPDEAsString.c"
+#include "GetFloatAsString.c"
 #include "SiPMTimeResolution.c"
 #include "SingletToTripletFunction.c"
 #include "SingletToTripletYALE.c"
@@ -126,12 +126,13 @@ void RunMC(int IsTPBon, int seed, TString evt_type)
   //Define Ntuple TTree
   //Write output
   TString num = Form("%ld",evt_max); //TString::Form formats a string
+  TString name_pde = GetFloatAsString(pde);
+  TString name_coll_eff = GetFloatAsString(coll_eff);
   TString nSeed = Form("S%d",seed);
-  TString name_pde = GetPDEAsString(pde);
   TString tpb = "";
   if (IsTPBon==1){tpb="TPBon";}
   else if (IsTPBon==0){tpb="TPBoff";}
-  TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
+  TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+name_coll_eff+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
   TFile *fout = TFile::Open(filename,"recreate");
 
   //defining variables to save in the TTree

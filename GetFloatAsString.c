@@ -1,6 +1,6 @@
 #include <sstream>
 
-TString GetPDEAsString(double pde)
+TString GetFloatAsString(double pde)
 {
   TString npde = "";
 

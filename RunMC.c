@@ -4,14 +4,16 @@
 //---------------------------------------//
 //---------------------------------------//
 // How to run the MC:                    //
-//   1) int IsTPBon, set to 1 if there   //
+//   1) long evt_max, number of          //
+//      simulated events                 //
+//   2) int IsTPBon, set to 1 if there   //
 //      is TPB, 0 if there is not        //
-//   2) int seed: pick a number between  //
+//   3) int seed: pick a number between  //
 //      −32,767 and 32,767               //
-//   3) TString evt_type: NR or ER       //
-//   4) edit other simulation parameters //
+//   4) TString evt_type: NR or ER       //
+//   5) edit other simulation parameters //
 //      in constants.c                   //
-//   5) run ReadOutput1.c and            //
+//   6) run ReadOutput1.c and            //
 //      ReadOutput2.c on the data files  //
 //      to graph results                 //
 //                                       //
@@ -30,7 +32,7 @@
 #include "SingletToTripletYALE.c"
 #include "SingletToTripletSCENE.c"
 
-void RunMC(int IsTPBon, int seed, TString evt_type)
+void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 {
 
   //--------------------------------------------------------------------//

@@ -2,14 +2,18 @@
 
 void ReadOutput(TString filename){
 
-  //define the constants structure
+  //Step 1: define the constants structure (first defined in RunMC.c)
   struct constant_list {
     long evts;
     double eMin;
     double eMax;
+    double SiPM_pde;
+    double light_cov;
+    int tpbOnOff;
+    char recoil;
   };
 
-  //read in the data file
+  //Step 2: read in the data file
   TFile *fileIN = TFile::Open(filename);
   TTree *SiPMmc = (TTree*)fileIN->Get("SiPMmc");
 
@@ -23,12 +27,23 @@ void ReadOutput(TString filename){
   SiPMmc->SetBranchAddress("erecoil",&erecoil);
   SiPMmc->SetBranchAddress("constants", &constants);
 
-  SiPMmc->GetEntry(0);
-  Long_t evt_max = constants.evts;
-  SiPMmc->GetEntry(1);
-  Double_t energy_min = constants.eMin;
-  SiPMmc->GetEntry(2);
-  Double_t energy_max = constants.eMax;
+  //load the constants
+  SiPMmc->GetEntry(0); Long_t evt_max = constants.evts;
+  SiPMmc->GetEntry(1); Double_t energy_min = constants.eMin;
+  SiPMmc->GetEntry(2); Double_t energy_max = constants.eMax;
+  SiPMmc->GetEntry(3); Double_t pde = constants.SiPM_pde;
+  SiPMmc->GetEntry(4); Double_t coll_eff = constants.light_cov;
+  SiPMmc->GetEntry(5); Int_t tpb = constants.tpbOnOff;
+  SiPMmc->GetEntry(6); TString evt_type = constants.recoil;
+
+  //Step 3: format
+  //change constants into strings
+  TString num = Form("%ld",evt_max);
+  TString name_pde = Form("%fd",pde);
+  TString name_coll_eff = Form("%fd",coll_eff);
+  string OnOff;
+  if (tpb==0){OnOff="off";}
+  else if (tpb==1){OnOff="on";}
 
   //format file name to use later
   filename.ReplaceAll("Data/","");
@@ -38,7 +53,8 @@ void ReadOutput(TString filename){
   gStyle->SetOptStat(0);
 
 
-  // Graph1: true PSD vs recorded PSD
+  //Step 4: Graphing
+  //Graph1: true PSD vs recorded PSD
   //making a graph of 100 bins from 0 to 1 on the x axis and 100 bins from 0 to 1 on the y axis
   TH2D *hPSD = new TH2D("hPSD","",100,0,1,100,0,1);
 
@@ -58,11 +74,9 @@ void ReadOutput(TString filename){
      hPSDenergy->Fill(erecoil,rpsd);
   }
 
-
-  //graph the data
   //Graph1
   TCanvas *c1 = new TCanvas("c1","c1");
-  hPSD->SetTitle(filename);
+  hPSD->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
   hPSD->GetXaxis()->SetTitle("Recorded PSD");
   hPSD->GetYaxis()->SetTitle("True PSD");
   hPSD->Draw();
@@ -75,7 +89,7 @@ void ReadOutput(TString filename){
 
   //Graph2
   TCanvas *c2 = new TCanvas("c2","c2");
-  hPhotons->SetTitle(filename);
+  hPhotons->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
   hPhotons->GetXaxis()->SetTitle("Recoil energy (keV)");
   hPhotons->GetYaxis()->SetTitle("Number of collected photons");
   hPhotons->Draw();
@@ -84,7 +98,7 @@ void ReadOutput(TString filename){
 
   //Graph3
   TCanvas *c3 = new TCanvas("c3","c3");
-  hPSDenergy->SetTitle(filename);
+  hPSDenergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
   hPSDenergy->GetXaxis()->SetTitle("Recoil energy (keV)");
   hPSDenergy->GetYaxis()->SetTitle("Recorded PSD");
   hPSDenergy->Draw();

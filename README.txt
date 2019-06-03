@@ -9,7 +9,15 @@
 
 1) Run the Simulator with the following line:
 
-   root -l 'RunMC.c(# of evt, TPN on/off, Random SEED, NR/ER)'
+   root -l 'RunMC.c(TPN on/off, Random SEED, "NR"/"ER")'
+
+2) Graph the simulation data
+   root -l 'ReadOutput.c("Data/<filename>")'
+
+//
+// Filename
+//
+   SiPM_"+number of events+"_"+PDE+"_"+collection efficiency+"_"+Seed+"_"+TPBon/TPBoff+"_"+NR/ER+".root"
 
 //---------------------------//
 // AVAILABLE FUNCTIONALITIES //

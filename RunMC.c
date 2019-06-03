@@ -150,16 +150,28 @@ void RunMC(int IsTPBon, int seed, TString evt_type)
   SiPMmc->Branch("n_scint_p",&n_scint_p);
   SiPMmc->Branch("n_coll_p",&n_coll_p);
   //gather my constants in a structure & save them in a branch
+  char recoil_type;
+  if (evt_type=="NR"){recoil_type='N';}
+  else if (evt_type=="ER"){recoil_type='E';}
+  //defined again in ReadOutput.c
   struct constant_list {
     long evts;
     double eMin;
     double eMax;
+    double SiPM_pde;
+    double light_cov;
+    int tpbOnOff;
+    char recoil;
   };
   constant_list this_run;
   this_run.evts = evt_max;
   this_run.eMin = energy_min;
   this_run.eMax = energy_max;
-  SiPMmc->Branch("constants", &this_run, "evt_max/L:energy_min/D:energy_max/D");
+  this_run.SiPM_pde = pde;
+  this_run.light_cov = coll_eff;
+  this_run.tpbOnOff = IsTPBon;
+  this_run.recoil = recoil_type;
+  SiPMmc->Branch("constants", &this_run, "evt_max/L:energy_min/D:energy_max/D:pde/D:coll_eff/D:tpb/I:evt_type:C");
   //Pietro wrote this and commented it out, I'm not sure why
   //SiPMmc->Branch("pht_st",&pht_st);
   //SiPMmc->Branch("pht_wl",&pht_wl);

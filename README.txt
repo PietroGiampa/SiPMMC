@@ -12,7 +12,11 @@
    root -l 'RunMC.c(TPN on/off, Random SEED, "NR"/"ER")'
 
 2) Graph the simulation data
-   root -l 'ReadOutput.c("Data/<filename>")'
+   Graphs with either ER or NR:
+   root -l 'ReadOutput1.c("Data/<filename>")'
+   
+   Graphs with both ER and NR:
+   root -l 'ReadOutput2.c("Data/<ER_filename>", "Data/<NR_filename>")'
 
 //
 // Filename

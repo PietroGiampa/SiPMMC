@@ -1,6 +1,6 @@
 //takes the output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, and recorded PSD vs energy
 
-void ReadOutput(TString filename){
+void ReadOutput1(TString filename){
 
   //Step 1: define the constants structure (first defined in RunMC.c)
   struct constant_list {

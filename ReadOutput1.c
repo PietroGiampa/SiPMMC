@@ -46,8 +46,11 @@ void ReadOutput1(TString filename){
   else if (tpb==1){OnOff="on";}
 
   //format file name to use later
-  filename.ReplaceAll("Data/","");
-  filename.ReplaceAll(".root","");
+  TString directory = filename;
+  directory.ReplaceAll("Data/","");
+  directory.ReplaceAll(".root","");
+  directory.ReplaceAll("_NR","");
+  directory.ReplaceAll("_ER","");
 
   //get rid of the stats box
   gStyle->SetOptStat(0);
@@ -55,6 +58,9 @@ void ReadOutput1(TString filename){
 
   //Step 4: Graphing
   //Graph1: true PSD vs recorded PSD
+
+  if (evt_type=='E'){gStyle->SetMarkerColor(kRed);}
+
   //making a graph of 100 bins from 0 to 1 on the x axis and 100 bins from 0 to 1 on the y axis
   TH2D *hPSD = new TH2D("hPSD","",100,0,1,100,0,1);
 
@@ -74,6 +80,7 @@ void ReadOutput1(TString filename){
      hPSDenergy->Fill(erecoil,rpsd);
   }
 
+
   //Graph1
   TCanvas *c1 = new TCanvas("c1","c1");
   hPSD->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
@@ -85,7 +92,7 @@ void ReadOutput1(TString filename){
   line1->Draw("same");
 
   //save the image
-  c1->SaveAs("Img/"+filename+"__TruePSDvsRecPSD.png");
+  c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
 
   //Graph2
   TCanvas *c2 = new TCanvas("c2","c2");
@@ -94,7 +101,7 @@ void ReadOutput1(TString filename){
   hPhotons->GetYaxis()->SetTitle("Number of collected photons");
   hPhotons->Draw();
 
-  c2->SaveAs("Img/"+filename+"__PhotonsVsEnergy.png");
+  c2->SaveAs("Img/"+directory+"/"+evt_type+"R__PhotonsVsEnergy.png");
 
   //Graph3
   TCanvas *c3 = new TCanvas("c3","c3");
@@ -103,7 +110,7 @@ void ReadOutput1(TString filename){
   hPSDenergy->GetYaxis()->SetTitle("Recorded PSD");
   hPSDenergy->Draw();
 
-  c3->SaveAs("Img/"+filename+"__RecPSDvsEnergy.png");
+  c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy.png");
 
 }
 

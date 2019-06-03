@@ -57,8 +57,10 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   else if (tpb==1){OnOff="on";}
 
   //format file name to use later
-  ER_filename.ReplaceAll("Data/","");
-  ER_filename.ReplaceAll(".root","");
+  TString directory = ER_filename;
+  directory.ReplaceAll("Data/","");
+  directory.ReplaceAll(".root","");
+  directory.ReplaceAll("_ER","");
 
   //get rid of the stats box
   gStyle->SetOptStat(0);
@@ -138,8 +140,8 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
 
 
   //Save stuff
-  c1->SaveAs("Img/"+ER_filename+"&NR__TruePSDvsRecPSD.png");
-  c2->SaveAs("Img/"+ER_filename+"&NR__PhotonsVsEnergy.png");
-  c3->SaveAs("Img/"+ER_filename+"&NR__RecPSDvsEnergy.png");
+  c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");
+  c2->SaveAs("Img/"+directory+"/ER&NR__PhotonsVsEnergy.png");
+  c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");
 
 }

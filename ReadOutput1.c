@@ -92,6 +92,7 @@ void ReadOutput1(TString filename){
   line1->Draw("same");
 
   //save the image
+  gSystem->Exec("mkdir Img/"+directory);
   c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
 
   //Graph2

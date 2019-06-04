@@ -39,6 +39,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   // Stage 1, Set Up                                                    //
   //--------------------------------------------------------------------//
   //Get the LAr emission Spectrum
+  //Where are these parameters from?
   TF1 *LArEmission = new TF1("LArEmission",LArEmissionSpectrum,100,300,12);
   LArEmission->SetParameter(1,128);
   LArEmission->SetParameter(2,5);
@@ -123,8 +124,8 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   rndCDP.SetSeed(seed);
 
   //Define the Boundaries for reconstructed PSD
-  double low_int_bound = time_trigger-4.0;
-  double high_int_bound = time_trigger+86.0;
+  double low_int_bound = time_trigger-4.0; //lower integration bound?
+  double high_int_bound = time_trigger+86.0; //higher integration bound?
 
   //Define Ntuple TTree
   //Write output

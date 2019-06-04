@@ -1,14 +1,51 @@
+line numbers are from RunMC.c
+ap = ? (line 308)
 CDP: Correlated Delayed Pulse
+coll: collected/collection
+cov: coverage
 DAQ: Data Aquisition
 DN: Dark Noise
+e: energy
+eff: efficiency
+emi: emission
+ep: ? (line 233)
 ER: Electronic Recoil
-int: intermediate (or integer)
+evt: event
+gen: ? (line 291)
+gp: ? (line 232)
+h: histogram
+hist: histogram
+int: intermediate/integer/integration
+kk: ? (line 342)
 LAr: Liquid Argon
+max: maximum
 MC: Monte Carlo
+min: minimum
+n: number
+n_dn: ? (line 319)
 NR: Nuclear Recoil
+p: photons
+p_dn: ? (line 320)
+p0: ? (line 292)
+p1: ? (line 293)
+p2: ? (line 294)
+photo: photon?
+pht: photon
 PDE: Photon Detection Efficiency of SiPMs
 PDF: Probability Density Function
+poisson_dn: ? (line 321)
+pp: ? (line 290)
+prob: probability
 PSD: Pulse Shape Discrimination
+rec: recorded
+rnd: random
+scint: scintillation
 SiPM: Silicon Photomultiplier
 spu: spurious
+st: ? (line 146)
 TPB: Tetraphenyl-Butadiene wavelength shifter
+tru: true
+tw: time window
+u_pr: ? (line 144)
+WF: ? (line 339)
+wl: wavelength

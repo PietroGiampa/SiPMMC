@@ -18,11 +18,11 @@ void ReadOutput1(TString filename){
   TTree *SiPMmc = (TTree*)fileIN->Get("SiPMmc");
 
   //fetch the necessary stuff from the data file
-  Double_t epsd, rpsd, erecoil;
+  Double_t tru_psd, rec_psd, erecoil;
   Int_t n_coll_p;
   constant_list constants;
-  SiPMmc->SetBranchAddress("epsd",&epsd);
-  SiPMmc->SetBranchAddress("rpsd",&rpsd);
+  SiPMmc->SetBranchAddress("tru_psd",&tru_psd);
+  SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
   SiPMmc->SetBranchAddress("n_coll_p",&n_coll_p);
   SiPMmc->SetBranchAddress("erecoil",&erecoil);
   SiPMmc->SetBranchAddress("constants", &constants);
@@ -75,9 +75,9 @@ void ReadOutput1(TString filename){
   //loop through all of the events and add them to the graph
   for (int i=0; i<evt_max; i++){
      SiPMmc->GetEntry(i);
-     hPSD->Fill(rpsd,epsd);
+     hPSD->Fill(rec_psd,tru_psd);
      hPhotons->Fill(erecoil,n_coll_p);
-     hPSDenergy->Fill(erecoil,rpsd);
+     hPSDenergy->Fill(erecoil,rec_psd);
   }
 
 

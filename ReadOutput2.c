@@ -23,19 +23,19 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   TTree *SiPMmc2 = (TTree*)fileIN2->Get("SiPMmc");
 
   //fetch the necessary stuff from the ER data file
-  Double_t epsd1, rpsd1, erecoil1;
+  Double_t tru_psd1, rec_psd1, erecoil1;
   Int_t n_coll_p1;
   constant_list constants1;
-  SiPMmc1->SetBranchAddress("epsd",&epsd1);
-  SiPMmc1->SetBranchAddress("rpsd",&rpsd1);
+  SiPMmc1->SetBranchAddress("tru_psd",&tru_psd1);
+  SiPMmc1->SetBranchAddress("rec_psd",&rec_psd1);
   SiPMmc1->SetBranchAddress("n_coll_p",&n_coll_p1);
   SiPMmc1->SetBranchAddress("erecoil",&erecoil1);
   SiPMmc1->SetBranchAddress("constants", &constants1);
   //fetch the necessary stuff from the NR data file
-  Double_t epsd2, rpsd2, erecoil2;
+  Double_t tru_psd2, rec_psd2, erecoil2;
   Int_t n_coll_p2;
-  SiPMmc2->SetBranchAddress("epsd",&epsd2);
-  SiPMmc2->SetBranchAddress("rpsd",&rpsd2);
+  SiPMmc2->SetBranchAddress("tru_psd",&tru_psd2);
+  SiPMmc2->SetBranchAddress("rec_psd",&rec_psd2);
   SiPMmc2->SetBranchAddress("n_coll_p",&n_coll_p2);
   SiPMmc2->SetBranchAddress("erecoil",&erecoil2);
 
@@ -85,12 +85,12 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   for (int i=0; i<evt_max; i++){
     SiPMmc1->GetEntry(i);
     SiPMmc2->GetEntry(i);
-    hPSD1->Fill(rpsd1,epsd1);
-    hPSD2->Fill(rpsd2,epsd2);
+    hPSD1->Fill(rec_psd1,tru_psd1);
+    hPSD2->Fill(rec_psd2,tru_psd2);
     hPhotons1->Fill(erecoil1,n_coll_p1);
     hPhotons2->Fill(erecoil2,n_coll_p2);
-    hPSDenergy1->Fill(erecoil1,rpsd1);
-    hPSDenergy2->Fill(erecoil2,rpsd2);
+    hPSDenergy1->Fill(erecoil1,rec_psd1);
+    hPSDenergy2->Fill(erecoil2,rec_psd2);
   }
 
   //Graph1

@@ -24,6 +24,7 @@
 #include "constants.c"
 #include "DecayFunction.c"
 #include "LArEmissionSpectrum.c"
+#include "MakeList.c"
 #include "SiPMcdpPDF.c"
 #include "SiPMcdpHist.c"
 #include "GetFloatAsString.c"
@@ -157,28 +158,13 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   char recoil_type;
   if (evt_type=="NR"){recoil_type='N';}
   else if (evt_type=="ER"){recoil_type='E';}
-  //defined again in ReadOutput.c
-  struct constant_list {
-    long evts;
-    double eMin;
-    double eMax;
-    double SiPM_pde;
-    double light_cov;
-    int tpbOnOff;
-    char recoil;
-  };
-  constant_list this_run;
-  this_run.evts = evt_max;
-  this_run.eMin = energy_min;
-  this_run.eMax = energy_max;
-  this_run.SiPM_pde = pde;
-  this_run.light_cov = coll_eff;
-  this_run.tpbOnOff = IsTPBon;
-  this_run.recoil = recoil_type;
-  SiPMmc->Branch("constants", &this_run, "evt_max/L:energy_min/D:energy_max/D:pde/D:coll_eff/D:tpb/I:evt_type:C");
+  constant_list this_run = MakeList(evt_max, energy_min, energy_max, pde, coll_eff, IsTPBon, recoil_type);
+//  SiPMmc->Branch("constants", &this_run, "evt_max/L:energy_min/D:energy_max/D:pde/D:coll_eff/D:tpb/I:evt_type:C");
+  SiPMmc->Branch("constants", &this_run);
   //Pietro wrote this and commented it out, I'm not sure why
   //SiPMmc->Branch("pht_st",&pht_st);
   //SiPMmc->Branch("pht_wl",&pht_wl);
+
   //--------------------------------------------------------------------//
   // Stage 2, Event by Event simulation                                //
   //--------------------------------------------------------------------//
@@ -229,10 +215,6 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
       for (int ipht=0; ipht<n_coll_p; ipht++)
 	{
 	  //Define some basic variables for definition loop
-	  double gp_wl=1.0;
-	  double ep_wl=0.0;
-	  double gp_st=1.0;
-	  double ep_st=0.0;
 	  double wl=0.0; //wavelength
 	  double st=0.0; //emission time
 

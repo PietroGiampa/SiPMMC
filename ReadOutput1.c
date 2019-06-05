@@ -1,19 +1,10 @@
 //takes the output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, and recorded PSD vs energy
 
+#include "MakeList.c"
+
 void ReadOutput1(TString filename){
 
-  //Step 1: define the constants structure (first defined in RunMC.c)
-  struct constant_list {
-    long evts;
-    double eMin;
-    double eMax;
-    double SiPM_pde;
-    double light_cov;
-    int tpbOnOff;
-    char recoil;
-  };
-
-  //Step 2: read in the data file
+  //Step 1: read in the data file
   TFile *fileIN = TFile::Open(filename);
   TTree *SiPMmc = (TTree*)fileIN->Get("SiPMmc");
 
@@ -36,7 +27,7 @@ void ReadOutput1(TString filename){
   SiPMmc->GetEntry(5); Int_t tpb = constants.tpbOnOff;
   SiPMmc->GetEntry(6); TString evt_type = constants.recoil;
 
-  //Step 3: format
+  //Step 2: format
   //change constants into strings
   TString num = Form("%ld",evt_max);
   TString name_pde = Form("%fd",pde);
@@ -56,7 +47,7 @@ void ReadOutput1(TString filename){
   gStyle->SetOptStat(0);
 
 
-  //Step 4: Graphing
+  //Step 3: Graphing
   //Graph1: true PSD vs recorded PSD
 
   if (evt_type=='E'){gStyle->SetMarkerColor(kRed);}
@@ -91,18 +82,12 @@ void ReadOutput1(TString filename){
   TF1 *line1 = new TF1("line","x",0,1);
   line1->Draw("same");
 
-  //save the image
-  gSystem->Exec("mkdir Img/"+directory);
-  c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
-
   //Graph2
   TCanvas *c2 = new TCanvas("c2","c2");
   hPhotons->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
   hPhotons->GetXaxis()->SetTitle("Recoil energy (keV)");
   hPhotons->GetYaxis()->SetTitle("Number of collected photons");
   hPhotons->Draw();
-
-  c2->SaveAs("Img/"+directory+"/"+evt_type+"R__PhotonsVsEnergy.png");
 
   //Graph3
   TCanvas *c3 = new TCanvas("c3","c3");
@@ -111,6 +96,10 @@ void ReadOutput1(TString filename){
   hPSDenergy->GetYaxis()->SetTitle("Recorded PSD");
   hPSDenergy->Draw();
 
+  //Step 4: save
+  gSystem->Exec("mkdir Img/"+directory);
+  c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
+  c2->SaveAs("Img/"+directory+"/"+evt_type+"R__PhotonsVsEnergy.png");
   c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy.png");
 
 }

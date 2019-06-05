@@ -1,21 +1,11 @@
 //takes both ER and NR output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, and recorded PSD vs energy
 //I'm assumeing that the ER and NR simulations have the same constants
 
+#include "MakeList.c"
+
 void ReadOutput2(TString ER_filename, TString NR_filename){
 
-  //Step 1: define the constants structure (first defined in RunMC.c)
-  struct constant_list {
-    long evts;
-    double eMin;
-    double eMax;
-    double SiPM_pde;
-    double light_cov;
-    int tpbOnOff;
-    char recoil;
-  };
-
-
-  //Step 2: read in the ER data file
+  //Step 1: read in the ER data file
   TFile *fileIN1 = TFile::Open(ER_filename);
   TTree *SiPMmc1 = (TTree*)fileIN1->Get("SiPMmc");
   //read in the NR data file
@@ -47,7 +37,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   SiPMmc1->GetEntry(4); Double_t coll_eff = constants1.light_cov;
   SiPMmc1->GetEntry(5); Int_t tpb = constants1.tpbOnOff;
 
-  //Step 3: format
+  //Step 2: format
   //change constants into strings
   TString num = Form("%ld",evt_max);
   TString name_pde = Form("%fd",pde);
@@ -65,7 +55,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   //get rid of the stats box
   gStyle->SetOptStat(0);
 
-  //Step 4: Graphing
+  //Step 3: Graphing
   //Graph1: true PSD vs recorded PSD
   //making a graph of 100 bins from 0 to 1 on the x axis and 100 bins from 0 to 1 on the y axis
   TH2D *hPSD1 = new TH2D("hPSD1","",100,0,1,100,0,1);
@@ -139,7 +129,8 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   leg3->Draw("same");
 
 
-  //Save stuff
+  //Step 4: Save stuff
+  gSystem->Exec("mkdir Img/"+directory);
   c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");
   c2->SaveAs("Img/"+directory+"/ER&NR__PhotonsVsEnergy.png");
   c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");

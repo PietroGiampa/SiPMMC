@@ -16,15 +16,15 @@ void ReadOutput1(TString filename){
   SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
   SiPMmc->SetBranchAddress("n_coll_p",&n_coll_p);
   SiPMmc->SetBranchAddress("erecoil",&erecoil);
-  SiPMmc->SetBranchAddress("constants", &constants);
+  SiPMmc->SetBranchAddress("constants", (Long64_t*)(&constants));
 
   //load the constants
-  SiPMmc->GetEntry(0); Long_t evt_max = constants.evts;
-  SiPMmc->GetEntry(1); Double_t energy_min = constants.eMin;
-  SiPMmc->GetEntry(2); Double_t energy_max = constants.eMax;
-  SiPMmc->GetEntry(3); Double_t pde = constants.SiPM_pde;
-  SiPMmc->GetEntry(4); Double_t coll_eff = constants.light_cov;
-  SiPMmc->GetEntry(5); Int_t tpb = constants.tpbOnOff;
+  SiPMmc->GetEntry(0); long evt_max = constants.evts;
+  SiPMmc->GetEntry(1); double energy_min = constants.eMin;
+  SiPMmc->GetEntry(2); double energy_max = constants.eMax;
+  SiPMmc->GetEntry(3); double pde = constants.SiPM_pde;
+  SiPMmc->GetEntry(4); double coll_eff = constants.light_cov;
+  SiPMmc->GetEntry(5); int tpb = constants.tpbOnOff;
   SiPMmc->GetEntry(6); TString evt_type = constants.recoil;
 
   //Step 2: format

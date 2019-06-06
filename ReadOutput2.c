@@ -20,7 +20,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   SiPMmc1->SetBranchAddress("rec_psd",&rec_psd1);
   SiPMmc1->SetBranchAddress("n_coll_p",&n_coll_p1);
   SiPMmc1->SetBranchAddress("erecoil",&erecoil1);
-  SiPMmc1->SetBranchAddress("constants", &constants1);
+  SiPMmc1->SetBranchAddress("constants", (Long64_t*)(&constants1));
   //fetch the necessary stuff from the NR data file
   Double_t tru_psd2, rec_psd2, erecoil2;
   Int_t n_coll_p2;

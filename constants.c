@@ -23,7 +23,7 @@ TRandom3 rnd;
 TRandom3 rndCDP;
 
 // set by user
-double coll_eff = 0.6; //detector collection efficiency [%] - I think this is light coverage/area coverage of photodetectors
+double coll_eff = 1.0; //detector collection efficiency [%] - I think this is light coverage/area coverage of photodetectors
 double overvoltage = 4.0; //Set the SiPM overvoltage [V]
 double time_window = 6000.0; //DAQ recording window [ns]
 double time_trigger = 2000.0; //DAQ Trigger time [ns]

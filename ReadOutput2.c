@@ -58,8 +58,9 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   //Step 3: Graphing
   //Graph1: true PSD vs recorded PSD
   //making a graph of 100 bins from 0 to 1 on the x axis and 100 bins from 0 to 1 on the y axis
-  TH2D *hPSD1 = new TH2D("hPSD1","",100,0,1,100,0,1);
-  TH2D *hPSD2 = new TH2D("hPSD2","",100,0,1,100,0,1);
+  TH2D *hPSD1 = new TH2D("hPSD1","",100,-0.02,1.02,100,0,1);
+  TH2D *hPSD2 = new TH2D("hPSD2","",100,-0.02,1.02,100,0,1);
+
 
   //Graph2: detected photons vs energy
   //not sure what the maximum photon number should be
@@ -67,8 +68,8 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   TH2D *hPhotons2 = new TH2D("hphotons2", "", 100, energy_min, energy_max, 100, 0, 1300);
 
   //Graph3: recorded PSD vs energy
-  TH2D *hPSDenergy1 = new TH2D("hPSDenergy1", "", 100, energy_min, energy_max, 100, 0, 1);
-  TH2D *hPSDenergy2 = new TH2D("hPSDenergy2", "", 100, energy_min, energy_max, 100, 0, 1);
+  TH2D *hPSDenergy1 = new TH2D("hPSDenergy1", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
+  TH2D *hPSDenergy2 = new TH2D("hPSDenergy2", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
 
 
   //loop through all of the events and add them to the graphs
@@ -95,7 +96,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   hPSD2->SetFillColor(kBlack);
   hPSD2->Draw("same");
   //add a y=x line
-  TF1 *line1 = new TF1("line","x",0,1);
+  TF1 *line1 = new TF1("line","x",-0.02,1.02);
   line1->Draw("same");
   //add a legend
   auto leg1 = new TLegend(.13,.68,.3,.88);

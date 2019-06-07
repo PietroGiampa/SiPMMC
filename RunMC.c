@@ -125,8 +125,8 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   rndCDP.SetSeed(seed);
 
   //Define the Boundaries for reconstructed PSD
-  double low_int_bound = time_trigger-4.0; //lower integration bound?
-  double high_int_bound = time_trigger+86.0; //higher integration bound?
+  double low_int_bound = time_trigger-4.0; //lower integration bound
+  double high_int_bound = time_trigger+86.0; //higher integration bound
 
   //Define Ntuple TTree
   //Write output
@@ -142,7 +142,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 
   //defining variables to save in the TTree
   int ievt, n_scint_p, n_coll_p; //ievt: event number; n_scint_p: number of scintillation photons; n_coll_p: number of collected photons
-  double tru_psd, erecoil, u_pr, rec_psd; // tru_psd: true PSD, erecoil: recoil energy, u_pr: ?, rec_psd: recorded PSD (with noise & stuff added)
+  double tru_psd, erecoil, u_pr, rec_psd; // tru_psd: true PSD, erecoil: recoil energy, u_pr: true singlet to triplet ratio, rec_psd: recorded PSD (with noise & stuff added)
   vector<double> pht_wl; //pulse vector? photon wavelength
   vector<double> pht_st; //pulse vector? phton emission time
   //defining a TTree

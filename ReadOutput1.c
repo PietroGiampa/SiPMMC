@@ -53,14 +53,14 @@ void ReadOutput1(TString filename){
   if (evt_type=='E'){gStyle->SetMarkerColor(kRed);}
 
   //making a graph of 100 bins from 0 to 1 on the x axis and 100 bins from 0 to 1 on the y axis
-  TH2D *hPSD = new TH2D("hPSD","",100,0,1,100,0,1);
+  TH2D *hPSD = new TH2D("hPSD","",100,-0.02,1.02,100,0,1);
 
   //Graph2: detected photons vs energy
   //not sure what the maximum photon number should be
   TH2D *hPhotons = new TH2D("hphotons", "", 100, energy_min, energy_max, 100, 0, 1300);
 
   //Graph3: recorded PSD vs energy
-  TH2D *hPSDenergy = new TH2D("hPSDenergy", "", 100, energy_min, energy_max, 100, 0, 1);
+  TH2D *hPSDenergy = new TH2D("hPSDenergy", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
 
 
   //loop through all of the events and add them to the graph
@@ -79,7 +79,7 @@ void ReadOutput1(TString filename){
   hPSD->GetYaxis()->SetTitle("True PSD");
   hPSD->Draw();
   //add a y=x line
-  TF1 *line1 = new TF1("line","x",0,1);
+  TF1 *line1 = new TF1("line","x",-0.02,1.02);
   line1->Draw("same");
 
   //Graph2

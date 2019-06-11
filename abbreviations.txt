@@ -29,7 +29,7 @@ photo: photon?
 pht: photon
 PDE: Photon Detection Efficiency of SiPMs
 PDF: Probability Density Function
-pp_time: delta-time of the individual CDP pulse under investigation
+pp_time: delta-time of the individual CDP pulse under investigation (primary pulse time?)
 prob: probability
 PSD: Pulse Shape Discrimination
 rec: recorded

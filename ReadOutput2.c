@@ -13,19 +13,21 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   TTree *SiPMmc2 = (TTree*)fileIN2->Get("SiPMmc");
 
   //fetch the necessary stuff from the ER data file
-  Double_t tru_psd1, rec_psd1, erecoil1;
+  Double_t tru_psd1, rec_psd1, residual1, erecoil1;
   Int_t n_coll_p1;
   constant_list constants1;
   SiPMmc1->SetBranchAddress("tru_psd",&tru_psd1);
   SiPMmc1->SetBranchAddress("rec_psd",&rec_psd1);
+  SiPMmc1->SetBranchAddress("residual",&residual1);
   SiPMmc1->SetBranchAddress("n_coll_p",&n_coll_p1);
   SiPMmc1->SetBranchAddress("erecoil",&erecoil1);
   SiPMmc1->SetBranchAddress("constants", (Long64_t*)(&constants1));
   //fetch the necessary stuff from the NR data file
-  Double_t tru_psd2, rec_psd2, erecoil2;
+  Double_t tru_psd2, rec_psd2, residual2, erecoil2;
   Int_t n_coll_p2;
   SiPMmc2->SetBranchAddress("tru_psd",&tru_psd2);
   SiPMmc2->SetBranchAddress("rec_psd",&rec_psd2);
+  SiPMmc2->SetBranchAddress("residual",&residual2);
   SiPMmc2->SetBranchAddress("n_coll_p",&n_coll_p2);
   SiPMmc2->SetBranchAddress("erecoil",&erecoil2);
 
@@ -36,6 +38,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   SiPMmc1->GetEntry(3); Double_t pde = constants1.SiPM_pde;
   SiPMmc1->GetEntry(4); Double_t coll_eff = constants1.light_cov;
   SiPMmc1->GetEntry(5); Int_t tpb = constants1.tpbOnOff;
+  SiPMmc1->GetEntry(6); TString evt_type = constants1.recoil;
 
   //Step 2: format
   //change constants into strings
@@ -57,7 +60,6 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
 
   //Step 3: Graphing
   //Graph1: true PSD vs recorded PSD
-  //making a graph of 100 bins from 0 to 1 on the x axis and 100 bins from 0 to 1 on the y axis
   TH2D *hPSD1 = new TH2D("hPSD1","",100,-0.02,1.02,100,0,1);
   TH2D *hPSD2 = new TH2D("hPSD2","",100,-0.02,1.02,100,0,1);
 
@@ -71,6 +73,10 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   TH2D *hPSDenergy1 = new TH2D("hPSDenergy1", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
   TH2D *hPSDenergy2 = new TH2D("hPSDenergy2", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
 
+  //Graph4: histogram of residual
+  TH1D *hRes1 = new TH1D("hRes1","",100, 0, 1);
+  TH1D *hRes2 = new TH1D("hRes2","",100, 0, 1);
+
 
   //loop through all of the events and add them to the graphs
   for (int i=0; i<evt_max; i++){
@@ -82,6 +88,8 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
     hPhotons2->Fill(erecoil2,n_coll_p2);
     hPSDenergy1->Fill(erecoil1,rec_psd1);
     hPSDenergy2->Fill(erecoil2,rec_psd2);
+    hRes1->Fill(residual1);
+    hRes2->Fill(residual2);
   }
 
   //Graph1
@@ -128,6 +136,20 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   leg3->AddEntry(hPSD1, "ER", "F");
   leg3->AddEntry(hPSD2, "NR", "F");
   leg3->Draw("same");
+
+  //Graph4
+  TCanvas *c4 = new TCanvas("c4", "c4");
+  hRes1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+  hRes1->GetXaxis()->SetTitle("PSD Residual");
+  hRes1->GetYaxis()->SetTitle("number of events");
+  hRes1->SetLineColor(kRed);
+  hRes2->SetLineColor(kBlack);
+  hRes2->Draw();
+  hRes1->Draw("same");
+  auto leg4 = new TLegend(.88,.72,.74,.89);
+  leg4->AddEntry(hPSD1, "ER", "F");
+  leg4->AddEntry(hPSD2, "NR", "F");
+  leg4->Draw("same");
 
 
   //Step 4: Save stuff

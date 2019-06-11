@@ -142,7 +142,8 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 
   //defining variables to save in the TTree
   int ievt, n_scint_p, n_coll_p; //ievt: event number; n_scint_p: number of scintillation photons; n_coll_p: number of collected photons
-  double tru_psd, erecoil, u_pr, rec_psd; // tru_psd: true PSD, erecoil: recoil energy, u_pr: true singlet to triplet ratio, rec_psd: recorded PSD (with noise & stuff added)
+  double tru_psd, erecoil, u_pr, rec_psd, residual; // tru_psd: true PSD, erecoil: recoil energy, u_pr: true singlet to triplet ratio,
+						    // rec_psd: recorded PSD (with noise & stuff added); residual: measure of goodness of rec_psd
   vector<double> pht_wl; //pulse vector? photon wavelength
   vector<double> pht_st; //pulse vector? phton emission time
   //defining a TTree
@@ -150,6 +151,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   SiPMmc->Branch("ievt",&ievt);
   SiPMmc->Branch("tru_psd",&tru_psd);
   SiPMmc->Branch("rec_psd",&rec_psd);
+  SiPMmc->Branch("residual",&residual);
   SiPMmc->Branch("u_pr",&u_pr);
   SiPMmc->Branch("erecoil",&erecoil);
   SiPMmc->Branch("n_scint_p",&n_scint_p);
@@ -328,6 +330,9 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 	  if (single_pulse_time>=low_int_bound){rec_full_count++;}
 	}//end of kk-loop
       rec_psd = rec_prompt_count/rec_full_count;//estimate reconstructed PSD
+
+      //the PSD residual is a measure of how well rec_psd reflects tru_psd
+      residual = abs((tru_psd-rec_psd)/tru_psd);
 
       //Fill TTree
       SiPMmc->Fill();

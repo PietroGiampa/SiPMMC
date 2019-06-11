@@ -1,4 +1,4 @@
-//takes the output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, and recorded PSD vs energy
+//takes the output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, and a histogram of residual
 
 #include "MakeList.c"
 
@@ -9,11 +9,12 @@ void ReadOutput1(TString filename){
   TTree *SiPMmc = (TTree*)fileIN->Get("SiPMmc");
 
   //fetch the necessary stuff from the data file
-  Double_t tru_psd, rec_psd, erecoil;
+  Double_t tru_psd, rec_psd, residual, erecoil;
   Int_t n_coll_p;
   constant_list constants;
   SiPMmc->SetBranchAddress("tru_psd",&tru_psd);
   SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
+  SiPMmc->SetBranchAddress("residual",&residual);
   SiPMmc->SetBranchAddress("n_coll_p",&n_coll_p);
   SiPMmc->SetBranchAddress("erecoil",&erecoil);
   SiPMmc->SetBranchAddress("constants", (Long64_t*)(&constants));
@@ -48,11 +49,10 @@ void ReadOutput1(TString filename){
 
 
   //Step 3: Graphing
-  //Graph1: true PSD vs recorded PSD
 
   if (evt_type=='E'){gStyle->SetMarkerColor(kRed);}
 
-  //making a graph of 100 bins from 0 to 1 on the x axis and 100 bins from 0 to 1 on the y axis
+  //Graph1: true PSD vs recorded PSD
   TH2D *hPSD = new TH2D("hPSD","",100,-0.02,1.02,100,0,1);
 
   //Graph2: detected photons vs energy
@@ -62,6 +62,9 @@ void ReadOutput1(TString filename){
   //Graph3: recorded PSD vs energy
   TH2D *hPSDenergy = new TH2D("hPSDenergy", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
 
+  //Graph4: histogram of residual
+  TH1D *hRes = new TH1D("hRes","",100, 0, 1);
+
 
   //loop through all of the events and add them to the graph
   for (int i=0; i<evt_max; i++){
@@ -69,6 +72,7 @@ void ReadOutput1(TString filename){
      hPSD->Fill(rec_psd,tru_psd);
      hPhotons->Fill(erecoil,n_coll_p);
      hPSDenergy->Fill(erecoil,rec_psd);
+     hRes->Fill(residual);
   }
 
 
@@ -96,11 +100,19 @@ void ReadOutput1(TString filename){
   hPSDenergy->GetYaxis()->SetTitle("Recorded PSD");
   hPSDenergy->Draw();
 
+  //Graph4
+  TCanvas *c4 = new TCanvas("c4", "c4");
+  hRes->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+  hRes->GetXaxis()->SetTitle("PSD Residual");
+  hRes->GetYaxis()->SetTitle("number of events");
+  hRes->Draw();
+
+
   //Step 4: save
   gSystem->Exec("mkdir Img/"+directory);
   c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
   c2->SaveAs("Img/"+directory+"/"+evt_type+"R__PhotonsVsEnergy.png");
   c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy.png");
-
+  c4->SaveAs("Img/"+directory+"/"+evt_type+"R__residual.png");
 }
 

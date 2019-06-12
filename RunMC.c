@@ -160,9 +160,8 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   char recoil_type;
   if (evt_type=="NR"){recoil_type='N';}
   else if (evt_type=="ER"){recoil_type='E';}
-  constant_list this_run = MakeList(evt_max, energy_min, energy_max, pde, coll_eff, IsTPBon, recoil_type);
-  SiPMmc->Branch("constants", &this_run, "evt_max/L:energy_min/D:energy_max/D:pde/D:coll_eff/D:tpb/I:evt_type:C");
-//  SiPMmc->Branch("constants", &this_run);
+  constant_list this_run = MakeList(evt_max, energy_min, energy_max, pde, coll_eff, photo_yield, IsTPBon, recoil_type);
+  SiPMmc->Branch("constants", &this_run, "evt_max/L:energy_min/D:energy_max/D:pde/D:coll_eff/D:photo_yield/D:tpb/I:evt_type/C");
   //Pietro wrote this and commented it out, I'm not sure why
   //SiPMmc->Branch("pht_st",&pht_st);
   //SiPMmc->Branch("pht_wl",&pht_wl);

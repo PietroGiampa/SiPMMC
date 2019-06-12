@@ -25,8 +25,9 @@ void ReadOutput1(TString filename){
   SiPMmc->GetEntry(2); double energy_max = constants.eMax;
   SiPMmc->GetEntry(3); double pde = constants.SiPM_pde;
   SiPMmc->GetEntry(4); double coll_eff = constants.light_cov;
-  SiPMmc->GetEntry(5); int tpb = constants.tpbOnOff;
-  SiPMmc->GetEntry(6); TString evt_type = constants.recoil;
+  SiPMmc->GetEntry(5); double photo_yield = constants.yield;
+  SiPMmc->GetEntry(6); int tpb = constants.tpbOnOff;
+  SiPMmc->GetEntry(7); TString evt_type = constants.recoil;
 
   //Step 2: format
   //change constants into strings
@@ -56,8 +57,8 @@ void ReadOutput1(TString filename){
   TH2D *hPSD = new TH2D("hPSD","",100,-0.02,1.02,100,0,1);
 
   //Graph2: detected photons vs energy
-  //not sure what the maximum photon number should be
-  TH2D *hPhotons = new TH2D("hphotons", "", 100, energy_min, energy_max, 100, 0, 1300);
+  double max_ph = energy_max*photo_yield*coll_eff;
+  TH2D *hPhotons = new TH2D("hphotons", "", 100, energy_min, energy_max, 100, 0, max_ph+50);
 
   //Graph3: recorded PSD vs energy
   TH2D *hPSDenergy = new TH2D("hPSDenergy", "", 100, energy_min, energy_max, 100, -0.02, 1.02);

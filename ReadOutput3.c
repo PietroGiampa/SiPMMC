@@ -9,11 +9,12 @@ void ReadOutput3(TString filename){
   TTree *SiPMmc = (TTree*)fileIN->Get("SiPMmc");
 
   //fetch the necessary stuff from the data file
-  Double_t tru_psd, rec_psd, erecoil;
+  Double_t tru_psd, rec_psd, residual, erecoil;
   Int_t n_coll_p;
   constant_list constants;
   SiPMmc->SetBranchAddress("tru_psd",&tru_psd);
   SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
+  SiPMmc->SetBranchAddress("residual",&residual);
   SiPMmc->SetBranchAddress("n_coll_p",&n_coll_p);
   SiPMmc->SetBranchAddress("erecoil",&erecoil);
   SiPMmc->SetBranchAddress("constants", (Long64_t*)(&constants));
@@ -24,8 +25,9 @@ void ReadOutput3(TString filename){
   SiPMmc->GetEntry(2); double energy_max = constants.eMax;
   SiPMmc->GetEntry(3); double pde = constants.SiPM_pde;
   SiPMmc->GetEntry(4); double coll_eff = constants.light_cov;
-  SiPMmc->GetEntry(5); int tpb = constants.tpbOnOff;
-  SiPMmc->GetEntry(6); TString evt_type = constants.recoil;
+  SiPMmc->GetEntry(5); double photo_yield = constants.yield;
+  SiPMmc->GetEntry(6); int tpb = constants.tpbOnOff;
+  SiPMmc->GetEntry(7); TString evt_type = constants.recoil;
 
   //Step 2: format
   //change constants into strings
@@ -52,10 +54,11 @@ void ReadOutput3(TString filename){
   if (evt_type=='E'){gStyle->SetMarkerColor(kRed);}
 
   //Graph1: true PSD vs number of photons
-  TH2D *hTru = new TH2D("hTru","",100,0,600,100,-0.02,1.02);
+  double max_ph = energy_max*photo_yield*coll_eff;
+  TH2D *hTru = new TH2D("hTru","",100,0,max_ph+50,100,-0.02,1.02);
 
   //Graph2: rec_psd vs number of photons
-  TH2D *hRec = new TH2D("hRec","",100,0,600,100,-0.02,1.02);
+  TH2D *hRec = new TH2D("hRec","",100,0,max_ph+50,100,-0.02,1.02);
 
 
   //loop through all of the events and add them to the graph

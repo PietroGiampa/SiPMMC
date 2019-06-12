@@ -104,7 +104,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   double cdp_rate = hCDP->Integral(0,tw_bin)/1E9;
 
   //Set Up DarkNoise ranges
-  double final_DN_rate = (DN_rate*n_SiPM*SiPM_A/1E9)*time_window;
+  double av_DN_num = (DN_rate*n_SiPM*SiPM_A/1E9)*time_window; //the /1E9 is to convert from s to ns
 
   //Set up time response function for the SiPM
   //This is a bit of a SiPM/DAQ related function
@@ -299,17 +299,20 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
       //--------------------------------------------------------------------//
       // Add Dark Noise                                                     //
       //--------------------------------------------------------------------//
+      //Can have up to 5 dark noise pulses (prob. of >5 is 7e-22 with DN_rate=0.2; n_SiPM=30; SiPM_A=25; time_window=6000)
       int n_dn = 5;
       double p_dn = rndCDP.Uniform(0.0000,1.0000);
-      double poisson_dn = 1.0;
+      double poisson_dn;
 
+     //check whether there will be 5, 4, 3, 2, 1, or 0 DN photons
       while(1)
 	{
-	  poisson_dn = TMath::Poisson(n_dn,final_DN_rate);
+	  poisson_dn = TMath::Poisson(n_dn,av_DN_num);
 	  if (p_dn<poisson_dn || n_dn==0){break;}
 	  n_dn--;
 	}//end while-loop
 
+      //if there are DN photons, add them to the data
       if (n_dn>0)
 	{
 	  for (int dn=0; dn<n_dn; dn++)

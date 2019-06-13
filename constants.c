@@ -16,21 +16,21 @@ double TPB_long_r = 0.08; //abundance
 double TPB_spu_r = 0.02; //abundance (abundances should add up to 1)
 
 //https://arxiv.org/abs/1903.03663
-double pde = 0.12; //PDE for the Hamamatsu VUV4 SIPM at 189 nm
+double pde = 0.30; //PDE for the Hamamatsu VUV4 SIPM at 189 nm
 double DN_rate = 0.2; //Hz/mm^2, for the Hamamatsu VUV4
 
 TRandom3 rnd;
 TRandom3 rndCDP;
 
 // set by user
-double coll_eff = 0.60; //detector collection efficiency [%] - light coverage/area coverage of photodetectors
+double coll_eff = 1.0; //detector collection efficiency [%] - light coverage/area coverage of photodetectors
 double overvoltage = 4.0; //Set the SiPM overvoltage [V]
 double time_window = 6000.0; //DAQ recording window [ns]
 double time_trigger = 2000.0; //DAQ Trigger time [ns]
 double time_full_window = time_window+time_trigger; //DAQ full window [ns]
 int n_SiPM = 30; //number of SiPMs in the experiment
 double SiPM_A = 25; //area of one SiPM in mm2
-double energy_min = 5.0; //minimum event energy in keV (5 is the minimum our code can handle)
-double energy_max = 20.0; //maximum event energy in keV
+double energy_min = 5.0; //minimum event energy in keV (can only calculate leakage down to 5 keV)
+double energy_max = 15.0; //maximum event energy in keV (can only calculate leakage up to 56 keV)
 double SiPMTimeResWidth = 0.5; //std deviation of the gaussian function blurring the SiPM time measurements
 

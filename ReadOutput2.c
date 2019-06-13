@@ -1,4 +1,5 @@
-//takes both ER and NR output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, and recorded PSD vs energy
+//takes both ER and NR output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, 
+//a histogram of residual, and leakage vs energy
 //I'm assumeing that the ER and NR simulations have the same constants
 
 #include "MakeList.c"
@@ -13,7 +14,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   TTree *SiPMmc2 = (TTree*)fileIN2->Get("SiPMmc");
 
   //fetch the necessary stuff from the ER data file
-  Double_t tru_psd1, rec_psd1, residual1, erecoil1;
+  Double_t tru_psd1, rec_psd1, residual1, erecoil1, leak_energy1;
   Int_t n_coll_p1;
   constant_list constants1;
   SiPMmc1->SetBranchAddress("tru_psd",&tru_psd1);
@@ -21,6 +22,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   SiPMmc1->SetBranchAddress("residual",&residual1);
   SiPMmc1->SetBranchAddress("n_coll_p",&n_coll_p1);
   SiPMmc1->SetBranchAddress("erecoil",&erecoil1);
+  SiPMmc1->SetBranchAddress("leak_energy",&leak_energy1);
   SiPMmc1->SetBranchAddress("constants", (Long64_t*)(&constants1));
   //fetch the necessary stuff from the NR data file
   Double_t tru_psd2, rec_psd2, residual2, erecoil2;
@@ -78,6 +80,10 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   TH1D *hRes1 = new TH1D("hRes1","",100, 0, 1);
   TH1D *hRes2 = new TH1D("hRes2","",100, 0, 1);
 
+  //Graph5: leakage vs energy
+  TH1D *hLeak = new TH1D("hLeak","",100,energy_min,energy_max);
+  TH1D *hEnergy = new TH1D("hEnergy","",100,energy_min,energy_max);
+
 
   //loop through all of the events and add them to the graphs
   for (int i=0; i<evt_max; i++){
@@ -91,6 +97,8 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
     hPSDenergy2->Fill(erecoil2,rec_psd2);
     hRes1->Fill(residual1);
     hRes2->Fill(residual2);
+    hLeak->Fill(leak_energy1);
+    hEnergy->Fill(erecoil1);
   }
 
   //Graph1
@@ -152,11 +160,20 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
   leg4->AddEntry(hPSD2, "NR", "F");
   leg4->Draw("same");
 
+  //Graph5
+  TH1D *hLeakEnergy = new TH1D(*hLeak);
+  hLeakEnergy->Divide(hEnergy);
+  TCanvas *c5 = new TCanvas("c5", "c5");
+  hLeakEnergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+  hLeakEnergy->GetXaxis()->SetTitle("Recoil energy (keV)");
+  hLeakEnergy->GetYaxis()->SetTitle("Leakage");
+  hLeakEnergy->Draw();
+
 
   //Step 4: Save stuff
   gSystem->Exec("mkdir Img/"+directory);
   c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");
   c2->SaveAs("Img/"+directory+"/ER&NR__PhotonsVsEnergy.png");
   c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");
-
+  c5->SaveAs("Img/"+directory+"/"+evt_type+"R__LeakageVsEnergy.png");
 }

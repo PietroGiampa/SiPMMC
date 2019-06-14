@@ -16,7 +16,7 @@ double TPB_long_r = 0.08; //abundance
 double TPB_spu_r = 0.02; //abundance (abundances should add up to 1)
 
 //https://arxiv.org/abs/1903.03663
-double pde = 0.30; //PDE for the Hamamatsu VUV4 SIPM at 189 nm
+double pde = 0.3; //PDE for the Hamamatsu VUV4 SIPM at 189 nm
 double DN_rate = 0.2; //Hz/mm^2, for the Hamamatsu VUV4
 
 TRandom3 rnd;

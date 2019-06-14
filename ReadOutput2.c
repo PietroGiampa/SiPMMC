@@ -1,10 +1,14 @@
-//takes both ER and NR output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, 
+//takes both ER and NR output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy,
 //a histogram of residual, and leakage vs energy
 //I'm assumeing that the ER and NR simulations have the same constants
 
+//If each data file comes from one simulation (there is one seed in the file name), don't use total_evts.
+//If each data file is a combination of multiple simulations (there are multiple seeds in the file name), set total_evts to the sum of the events from all
+//of the simulations (should be the first number in the file name).
+
 #include "MakeList.c"
 
-void ReadOutput2(TString ER_filename, TString NR_filename){
+void ReadOutput2(TString ER_filename, TString NR_filename, long total_evts=0){
 
   //Step 1: read in the ER data file
   TFile *fileIN1 = TFile::Open(ER_filename);
@@ -35,6 +39,7 @@ void ReadOutput2(TString ER_filename, TString NR_filename){
 
   //load the constants
   SiPMmc1->GetEntry(0); Long_t evt_max = constants1.evts;
+  if (total_evts==0) total_evts = evt_max;
   SiPMmc1->GetEntry(1); Double_t energy_min = constants1.eMin;
   SiPMmc1->GetEntry(2); Double_t energy_max = constants1.eMax;
   SiPMmc1->GetEntry(3); Double_t pde = constants1.SiPM_pde;

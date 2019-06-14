@@ -1,9 +1,13 @@
 //takes the output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, a histogram of residual, and
 //leakage vs energy
 
+//If the data file comes from one simulation (there is one seed in the file name), don't use total_evts.
+//If the data file is a combination of multiple simulations (there are multiple seeds in the file name), set total_evts to the sum of the events from all
+//of the simulations (should be the first number in the file name).
+
 #include "MakeList.c"
 
-void ReadOutput1(TString filename){
+void ReadOutput1(TString filename, long total_evts=0){
 
   //Step 1: read in the data file
   TFile *fileIN = TFile::Open(filename);
@@ -23,6 +27,7 @@ void ReadOutput1(TString filename){
 
   //load the constants
   SiPMmc->GetEntry(0); long evt_max = constants.evts;
+  if (total_evts==0) total_evts = evt_max;
   SiPMmc->GetEntry(1); double energy_min = constants.eMin;
   SiPMmc->GetEntry(2); double energy_max = constants.eMax;
   SiPMmc->GetEntry(3); double pde = constants.SiPM_pde;
@@ -33,7 +38,7 @@ void ReadOutput1(TString filename){
 
   //Step 2: format
   //change constants into strings
-  TString num = Form("%ld",evt_max);
+  TString num = Form("%ld",total_evts);
   TString name_pde = Form("%fd",pde);
   TString name_coll_eff = Form("%fd",coll_eff);
   string OnOff;
@@ -74,7 +79,7 @@ void ReadOutput1(TString filename){
 
 
   //loop through all of the events and add them to the graph
-  for (int i=0; i<evt_max; i++){
+  for (int i=0; i<total_evts; i++){
     SiPMmc->GetEntry(i);
     hPSD->Fill(rec_psd,tru_psd);
     hPhotons->Fill(erecoil,n_coll_p);

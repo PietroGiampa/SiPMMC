@@ -1,3 +1,7 @@
+//This file has been replaced with ReadOutput.c, so it is no longer being kept up to date.
+
+
+
 //takes both ER and NR output from RunMC.c and creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy,
 //a histogram of residual, and leakage vs energy
 //I'm assumeing that the ER and NR simulations have the same constants

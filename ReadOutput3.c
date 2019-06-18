@@ -1,5 +1,5 @@
 //takes the output from RunMC.c and creates a graph of true psd vs number of scintillation photons and recorded psd vs numbero of scintillation photons
-//this file was just created for debugging, so it's not kept up to date with ReadOutput1.c and ReadOutput2.c.
+//this file was just created for debugging, so it's not kept up to date.
 
 #include "MakeList.c"
 

@@ -3,13 +3,14 @@
 //If each data file comes from one simulation (there is one seed in the file name), don't use total_evts.
 //If each data file is a combination of multiple simulations (there are multiple seeds in the file name), set total_evts to the sum of the events from all
 //	of the simulations (should be the first number in the file name).
+//Default graph type is scatter plot. Set heat_map==1 to make a heat map.
 //If inputting only NR, you must pass "" to ER.
 
 //Creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, a histogram of residual, and leakage vs energy.
 
 #include "MakeList.c"
 
-void ReadOutput(TString ER="", TString NR="", long total_evts=0){
+void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0){
 
   int numFiles;
   if (ER == "" & NR == ""){
@@ -18,8 +19,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0){
   else if (ER == "" | NR == "") numFiles = 1;
   else numFiles = 2;
 
-  //check that they've inputted total_evts correctly
-//  if (find(ER, ER+ER.Length(), "-") != ER+ER.Length()){
+  //check that they've input total_evts correctly
   if ((ER.Contains("-") | NR.Contains("-")) & (total_evts==0)){
     cout << "If the data file is a combination of multiple simulations, you must set total_evts." << endl;
     exit(EXIT_FAILURE);}
@@ -189,11 +189,19 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0){
   hPSD1->GetYaxis()->SetTitle("True PSD");
   if (numFiles==1){
     hPSD1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
-    hPSD1->Draw();}
+    if (heat_map==1){
+      if (ER != "") gStyle->SetPalette(kSolar);
+      else if (NR != "") gStyle -> SetPalette(kBird);
+      hPSD1->Draw("COLZ");}
+    else hPSD1->Draw();
+  }
   TLegend *leg1;
   if (numFiles==2){
     hPSD1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
-    hPSD1->Draw();
+    if (heat_map==1){
+      gStyle->SetPalette(kSolar);
+      hPSD1->Draw("COLZ");}
+    else hPSD1->Draw();
     hPSD2->SetMarkerColor(kBlack);
     hPSD2->SetFillColor(kBlack);
     hPSD2->Draw("same");
@@ -230,12 +238,18 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0){
   if (ER != "") hPSDenergy1->SetMarkerColor(kRed);
   if (numFiles==1){
     hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
-    hPSDenergy1->Draw();}
+    if (heat_map==1){
+      hPSDenergy1->Draw("COLZ");}
+    else hPSDenergy1->Draw();}
   TLegend *leg3;
   if (numFiles==2){
     hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
-    hPSDenergy1->Draw();
-    hPSDenergy2->SetMarkerColor(kBlack);
+    if (heat_map==1){
+      gStyle->SetPalette(kSolar);
+      hPSDenergy1->Draw("COLZ");}
+    else hPSDenergy1->Draw();
+//why does it not look transparent??
+    hPSDenergy2->SetMarkerColorAlpha(kBlack, 0.5);
     hPSDenergy2->Draw("same");
     leg3 = new TLegend(.12,.28,.26,.11);
     leg3->AddEntry(hPSD1, "ER", "F");
@@ -280,11 +294,18 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0){
   //Step 4: Save stuff
   gSystem->Exec("mkdir Img/"+directory);
   if (numFiles==1){
-    c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
     c2->SaveAs("Img/"+directory+"/"+evt_type+"R__PhotonsVsEnergy.png");
-    c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy.png");
     c4->SaveAs("Img/"+directory+"/"+evt_type+"R__residual.png");
     if (evt_type=='E') c5->SaveAs("Img/"+directory+"/"+evt_type+"R__LeakageVsEnergy.png");
+    //add 'heatMap' to the file name if the graph is a heat map
+    if (heat_map==0){
+      c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
+      c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy.png");
+    }
+    else if (heat_map==1){
+      c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD_heatMap.png");
+      c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy_heatMap.png");
+    }
   }
   else { //numfiles==2
     c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");
@@ -292,5 +313,14 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0){
     c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");
     c4->SaveAs("Img/"+directory+"/ER&NR__residual.png");
     c5->SaveAs("Img/"+directory+"/"+evt_type+"R__LeakageVsEnergy.png");
+    //add 'heatMap' to the file name if the graph is a heat map
+    if (heat_map==0){
+      c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");
+      c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");
+    }
+    else if (heat_map==1){
+      c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD_heatMap.png");
+      c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy_heatMap.png");
+    }
   }
 }

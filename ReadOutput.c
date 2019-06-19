@@ -30,10 +30,10 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   //Step 1: Read in the data files
   //Define the data variables
   Double_t tru_psd1, rec_psd1, residual1, erecoil1, leak_energy1;
-  Int_t n_coll_p1;
+  Int_t n_coll_p1, badPSD1;
   constant_list constants1;
   Double_t tru_psd2, rec_psd2, residual2, erecoil2;
-  Int_t n_coll_p2;
+  Int_t n_coll_p2, badPSD2;
   constant_list constants2;
   Long_t evt_max;
   Double_t energy_min;
@@ -57,6 +57,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     SiPMmc1->SetBranchAddress("n_coll_p",&n_coll_p1);
     SiPMmc1->SetBranchAddress("erecoil",&erecoil1);
     SiPMmc1->SetBranchAddress("leak_energy",&leak_energy1);
+    SiPMmc1->SetBranchAddress("badPSD",&badPSD1);
     SiPMmc1->SetBranchAddress("constants", (Long64_t*)(&constants1));
     //load the constants
     //I'm not sure if the SiPMmc1->GetEntry(n) is necessary, but as long as it works I won't change it.
@@ -82,6 +83,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     SiPMmc2->SetBranchAddress("residual",&residual2);
     SiPMmc2->SetBranchAddress("n_coll_p",&n_coll_p2);
     SiPMmc2->SetBranchAddress("erecoil",&erecoil2);
+    SiPMmc2->SetBranchAddress("badPSD",&badPSD2);
     SiPMmc2->SetBranchAddress("constants", (Long64_t*)(&constants2));
     //load the constants
     //if you're only using NR, use these constants
@@ -157,8 +159,6 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     hRes2 = new TH1D("hRes2","",100, 0, 1);
   }
 
-  long BadPsdER = 0;
-  long BadPsdNR = 0;
 
   //loop through all of the events and add them to the graphs
   for (int i=0; i<total_evts; i++){
@@ -170,7 +170,6 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
       hRes1->Fill(residual1);
       hLeak->Fill(leak_energy1);
       hEnergy->Fill(erecoil1);
-      if (rec_psd1==0 | rec_psd1==1) BadPsdER += 1;
     }
     if (numFiles==2){
       SiPMmc2->GetEntry(i);
@@ -178,7 +177,6 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
       hPhotons2->Fill(erecoil2,n_coll_p2);
       hPSDenergy2->Fill(erecoil2,rec_psd2);
       hRes2->Fill(residual2);
-      if (rec_psd2==0 | rec_psd2==1) BadPsdNR += 1;
     }
     else if (ER == ""){ //NR != ""
       SiPMmc2->GetEntry(i);
@@ -186,9 +184,9 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
       hPhotons1->Fill(erecoil2,n_coll_p2);
       hPSDenergy1->Fill(erecoil2,rec_psd2);
       hRes1->Fill(residual2);
-      if (rec_psd2==0 | rec_psd2==1) BadPsdNR += 1;
     }
   }
+
 
   //Graph1
   TCanvas *c1 = new TCanvas("c1","c1");
@@ -322,9 +320,9 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
 
   //Fraction of events with PSD zero or 1
   TCanvas *c6 = new TCanvas("c6", "c6");
-  double fracBadER = double(BadPsdER)/double(total_evts);
+  double fracBadER = double(badPSD1)/double(total_evts);
   TString name_fracBadER;
-  double fracBadNR = double(BadPsdNR)/double(total_evts);
+  double fracBadNR = double(badPSD2)/double(total_evts);
   TString name_fracBadNR;
   if (ER != ""){
     name_fracBadER = GetFloatAsString(fracBadER);

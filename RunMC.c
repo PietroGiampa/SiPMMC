@@ -145,6 +145,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 
   //defining variables to save in the TTree
   int ievt, n_scint_p, n_coll_p; //ievt: event number; n_scint_p: number of scintillation photons; n_coll_p: number of collected photons
+  int badPSD = 0; //count of evts with PSD 0 or 1
   double tru_psd, erecoil, u_pr, rec_psd, residual, leak_energy; // tru_psd: true PSD, erecoil: recoil energy, u_pr: true singlet to triplet ratio, rec_psd: recorded
 			 //PSD (with noise & stuff added); residual: measure of goodness of rec_psd; leak_energy: the energy of ER events that leak into NR
   vector<double> pht_wl; //pulse vector? photon wavelength
@@ -160,6 +161,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   SiPMmc->Branch("erecoil",&erecoil);
   SiPMmc->Branch("n_scint_p",&n_scint_p);
   SiPMmc->Branch("n_coll_p",&n_coll_p);
+  SiPMmc->Branch("badPSD",&badPSD);
   //gather my constants in a structure & save them in a branch
   char recoil_type;
   if (evt_type=="NR"){recoil_type='N';}
@@ -339,6 +341,9 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 
       //the PSD residual is a measure of how well rec_psd reflects tru_psd
       residual = abs((tru_psd-rec_psd)/tru_psd);
+
+      //If rec_psd==0|1, that means it's been reconstructed badly. We want to count how many events do that.
+      if (rec_psd==0 | rec_psd==1) badPSD += 1;
 
       //leakage is the proportion of ER events that are miscategorized as NR because their PSD is above the average NR PSD
       //If rec_psd is >the average NR from YALE, add the energy to leak_energy.

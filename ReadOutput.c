@@ -6,9 +6,12 @@
 //Default graph type is scatter plot. Set heat_map==1 to make a heat map.
 //If inputting only NR, you must pass "" to ER.
 
-//Creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, a histogram of residual, and leakage vs energy.
+//Creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, a histogram of residual, and leakage vs energy. Calculates the
+//	fraction of events that have a PSD of zero or 1.
 
 #include "MakeList.c"
+#include "SingletToTripletYALE.c"
+#include "GetFloatAsString.c"
 
 void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0){
 
@@ -24,6 +27,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     cout << "If the data file is a combination of multiple simulations, you must set total_evts." << endl;
     exit(EXIT_FAILURE);}
 
+  //Step 1: Read in the data files
   //Define the data variables
   Double_t tru_psd1, rec_psd1, residual1, erecoil1, leak_energy1;
   Int_t n_coll_p1;
@@ -40,7 +44,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   Int_t tpb;
   TString evt_type;
 
-  //Step 1: read in the ER data file
+  //read in the ER data file
   TTree *SiPMmc1;
   TTree *SiPMmc2;
   if (ER != ""){
@@ -138,8 +142,9 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   //Graph4: histogram of residual
   TH1D *hRes1 = new TH1D("hRes1","",100, 0, 1);
   //Graph5: leakage vs energy
-  TH1D *hLeak = new TH1D("hLeak","",100,energy_min,energy_max);
-  TH1D *hEnergy = new TH1D("hEnergy","",100,energy_min,energy_max);
+  double numbins = (energy_max-energy_min)*2.0;
+  TH1D *hLeak = new TH1D("hLeak","",numbins,energy_min,energy_max);
+  TH1D *hEnergy = new TH1D("hEnergy","",numbins,energy_min,energy_max);
 
   TH2D *hPSD2;
   TH2D *hPhotons2;
@@ -152,6 +157,8 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     hRes2 = new TH1D("hRes2","",100, 0, 1);
   }
 
+  long BadPsdER = 0;
+  long BadPsdNR = 0;
 
   //loop through all of the events and add them to the graphs
   for (int i=0; i<total_evts; i++){
@@ -163,6 +170,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
       hRes1->Fill(residual1);
       hLeak->Fill(leak_energy1);
       hEnergy->Fill(erecoil1);
+      if (rec_psd1==0 | rec_psd1==1) BadPsdER += 1;
     }
     if (numFiles==2){
       SiPMmc2->GetEntry(i);
@@ -170,6 +178,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
       hPhotons2->Fill(erecoil2,n_coll_p2);
       hPSDenergy2->Fill(erecoil2,rec_psd2);
       hRes2->Fill(residual2);
+      if (rec_psd2==0 | rec_psd2==1) BadPsdNR += 1;
     }
     else if (ER == ""){ //NR != ""
       SiPMmc2->GetEntry(i);
@@ -177,6 +186,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
       hPhotons1->Fill(erecoil2,n_coll_p2);
       hPSDenergy1->Fill(erecoil2,rec_psd2);
       hRes1->Fill(residual2);
+      if (rec_psd2==0 | rec_psd2==1) BadPsdNR += 1;
     }
   }
 
@@ -213,6 +223,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   }
   //add a y=x line
   TF1 *line1 = new TF1("line","x",-0.02,1.02);
+  line1->SetLineColor(kBlue);
   line1->Draw("same");
 
   //Graph2
@@ -236,24 +247,43 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   hPSDenergy1->GetXaxis()->SetTitle("Recoil energy (keV)");
   hPSDenergy1->GetYaxis()->SetTitle("Recorded PSD");
   if (ER != "") hPSDenergy1->SetMarkerColor(kRed);
+  //if (numFiles==1)
   if (numFiles==1){
     hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
     if (heat_map==1){
-      hPSDenergy1->Draw("COLZ");}
-    else hPSDenergy1->Draw();}
+      hPSDenergy1->Draw("COLZ");
+    }
+    else hPSDenergy1->Draw();
+  }
+  //add a SingletToTripletYale line; it's stepped because that's how I implemented the leakage cut.
+  double energyLine[2*size];
+  double nuclearLine[2*size];
+  for (int i=0;i<size;i++){
+    energyLine[2*i] = energy[i]-0.5;
+    energyLine[2*i + 1] = energy[i]+0.5;
+    nuclearLine[2*i] = nuclear[i];
+    nuclearLine[2*i + 1] = nuclear[i];
+  }
+  TGraph *line3 = new TGraph(2*size, energyLine, nuclearLine);
+  line3->SetLineColor(kBlue);
+  line3->SetLineWidth(3);
+  line3->Draw("same");
+  //if (numFiles==2)
   TLegend *leg3;
   if (numFiles==2){
     hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
     if (heat_map==1){
       gStyle->SetPalette(kSolar);
-      hPSDenergy1->Draw("COLZ");}
+      hPSDenergy1->Draw("COLZ");
+    }
     else hPSDenergy1->Draw();
 //why does it not look transparent??
     hPSDenergy2->SetMarkerColorAlpha(kBlack, 0.5);
     hPSDenergy2->Draw("same");
-    leg3 = new TLegend(.12,.28,.26,.11);
+    leg3 = new TLegend(.88,.35,.70,.11);
     leg3->AddEntry(hPSD1, "ER", "F");
     leg3->AddEntry(hPSD2, "NR", "F");
+    leg3->AddEntry(line3, "50% NR", "L");
     leg3->Draw("same");
   }
 
@@ -290,6 +320,25 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     hLeakEnergy->Draw();
   }
 
+  //Fraction of events with PSD zero or 1
+  TCanvas *c6 = new TCanvas("c6", "c6");
+  double fracBadER = double(BadPsdER)/double(total_evts);
+  TString name_fracBadER;
+  double fracBadNR = double(BadPsdNR)/double(total_evts);
+  TString name_fracBadNR;
+  if (ER != ""){
+    name_fracBadER = GetFloatAsString(fracBadER);
+    cout << "The fraction of ER events with PSD zero or one is " << fracBadER << endl;
+//why isn't this showing up?
+    TLatex text1(0.25, 0.25, "The fraction of ER events with PSD zero or one is "+name_fracBadER);
+    text1.Draw();
+  }
+  if (NR != ""){
+    name_fracBadNR = GetFloatAsString(fracBadNR);
+    cout << "The fraction of NR events with PSD zero or one is " << fracBadNR << endl;
+    TLatex text2(0.25, 0.25, "The fraction of NR events with PSD zero or one is "+name_fracBadNR);
+    text2.Draw();
+  }
 
   //Step 4: Save stuff
   gSystem->Exec("mkdir Img/"+directory);
@@ -297,6 +346,8 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     c2->SaveAs("Img/"+directory+"/"+evt_type+"R__PhotonsVsEnergy.png");
     c4->SaveAs("Img/"+directory+"/"+evt_type+"R__residual.png");
     if (evt_type=='E') c5->SaveAs("Img/"+directory+"/"+evt_type+"R__LeakageVsEnergy.png");
+    if (evt_type=='E') c6->SaveAs("Img/"+directory+"/"+evt_type+"R__fracBad"+name_fracBadER+".png");
+    else if (evt_type=='N') c6->SaveAs("Img/"+directory+"/"+evt_type+"R__fracBad"+name_fracBadNR+".png");
     //add 'heatMap' to the file name if the graph is a heat map
     if (heat_map==0){
       c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
@@ -313,6 +364,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");
     c4->SaveAs("Img/"+directory+"/ER&NR__residual.png");
     c5->SaveAs("Img/"+directory+"/"+evt_type+"R__LeakageVsEnergy.png");
+    c6->SaveAs("Img/"+directory+"/frazBadER"+name_fracBadER+"NR"+name_fracBadNR+".png");
     //add 'heatMap' to the file name if the graph is a heat map
     if (heat_map==0){
       c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");

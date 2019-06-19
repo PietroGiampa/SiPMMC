@@ -29,7 +29,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
 
   //Step 1: Read in the data files
   //Define the data variables
-  Double_t tru_psd1, rec_psd1, residual1, erecoil1, leak_energy1;
+  Double_t tru_psd1, rec_psd1, residual1, erecoil1, leak_energy1, tot_good_nrg1;
   Int_t n_coll_p1, badPSD1;
   constant_list constants1;
   Double_t tru_psd2, rec_psd2, residual2, erecoil2;
@@ -57,6 +57,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     SiPMmc1->SetBranchAddress("n_coll_p",&n_coll_p1);
     SiPMmc1->SetBranchAddress("erecoil",&erecoil1);
     SiPMmc1->SetBranchAddress("leak_energy",&leak_energy1);
+    SiPMmc1->SetBranchAddress("tot_good_nrg",&tot_good_nrg1);
     SiPMmc1->SetBranchAddress("badPSD",&badPSD1);
     SiPMmc1->SetBranchAddress("constants", (Long64_t*)(&constants1));
     //load the constants
@@ -169,7 +170,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
       hPSDenergy1->Fill(erecoil1,rec_psd1);
       hRes1->Fill(residual1);
       hLeak->Fill(leak_energy1);
-      hEnergy->Fill(erecoil1);
+      hEnergy->Fill(tot_good_nrg1);
     }
     if (numFiles==2){
       SiPMmc2->GetEntry(i);

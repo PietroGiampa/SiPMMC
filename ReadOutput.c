@@ -311,12 +311,15 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   //Graph5
   TCanvas *c5 = new TCanvas("c5", "c5");
   if (ER != ""){
+    //calculate error bars
+    hLeak->Sumw2();
+    hEnergy->Sumw2();
     TH1D *hLeakEnergy = new TH1D(*hLeak);
     hLeakEnergy->Divide(hEnergy);
     hLeakEnergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
     hLeakEnergy->GetXaxis()->SetTitle("Recoil energy (keV)");
     hLeakEnergy->GetYaxis()->SetTitle("Leakage");
-    hLeakEnergy->Draw();
+    hLeakEnergy->Draw("E1");
   }
 
   //Fraction of events with PSD zero or 1

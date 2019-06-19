@@ -16,14 +16,14 @@ double TPB_long_r = 0.08; //abundance
 double TPB_spu_r = 0.02; //abundance (abundances should add up to 1)
 
 //https://arxiv.org/abs/1903.03663
-double pde = 0.07; //PDE for the Hamamatsu VUV4 SIPM at 189 nm
+double pde = 0.15; //PDE for the Hamamatsu VUV4 SIPM at 189 nm
 double DN_rate = 0.2; //Hz/mm^2, for the Hamamatsu VUV4
 
 TRandom3 rnd;
 TRandom3 rndCDP;
 
 // set by user
-double coll_eff = 0.3; //detector collection efficiency [%] - light coverage/area coverage of photodetectors
+double coll_eff = 0.4; //detector collection efficiency [%] - light coverage/area coverage of photodetectors
 double overvoltage = 4.0; //Set the SiPM overvoltage [V]
 double time_window = 6000.0; //DAQ recording window [ns]
 double time_trigger = 2000.0; //DAQ Trigger time [ns]

@@ -36,17 +36,13 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   Int_t n_coll_p2, badPSD2;
   constant_list constants2;
   Long_t evt_max;
-  Double_t energy_min;
-  Double_t energy_max;
-  Double_t pde;
-  Double_t coll_eff;
-  Double_t photo_yield;
+  Double_t energy_min, energy_max, pde, coll_eff, photo_yield;
   Int_t tpb;
   TString evt_type;
-
-  //read in the ER data file
   TTree *SiPMmc1;
   TTree *SiPMmc2;
+
+  //read in the ER data file
   if (ER != ""){
     TFile *fileIN1 = TFile::Open(ER);
     SiPMmc1 = (TTree*)fileIN1->Get("SiPMmc");
@@ -126,7 +122,6 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     directory = NR;
     directory.ReplaceAll("_NR","");
   }
-
   directory.ReplaceAll("Data/","");
   directory.ReplaceAll(".root","");
 
@@ -200,7 +195,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     hPSD1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
     if (heat_map==1){
       if (ER != "") gStyle->SetPalette(kSolar);
-      else if (NR != "") gStyle -> SetPalette(kBird);
+      else if (NR != "") gStyle->SetPalette(kPigeon);
       hPSD1->Draw("COLZ");}
     else hPSD1->Draw();
   }
@@ -227,13 +222,13 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
 
   //Graph2
   TCanvas *c2 = new TCanvas("c2","c2");
+  if (ER != "") hPhotons1->SetMarkerColor(kRed);
   hPhotons1->GetXaxis()->SetTitle("Recoil energy (keV)");
   hPhotons1->GetYaxis()->SetTitle("Number of collected photons");
-  if (ER != "") hPhotons1->SetMarkerColor(kRed);
   if (numFiles==1){
     hPhotons1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
     hPhotons1->Draw();}
-  if (numFiles==2){
+  else { //if (numFiles==2)
     hPhotons1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
     hPhotons1->Draw();
     hPhotons2->SetMarkerColor(kBlack);
@@ -243,13 +238,14 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
 
   //Graph3
   TCanvas *c3 = new TCanvas("c3","c3");
+  if (ER != "") hPSDenergy1->SetMarkerColor(kRed);
   hPSDenergy1->GetXaxis()->SetTitle("Recoil energy (keV)");
   hPSDenergy1->GetYaxis()->SetTitle("Recorded PSD");
-  if (ER != "") hPSDenergy1->SetMarkerColor(kRed);
-  //if (numFiles==1)
   if (numFiles==1){
     hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
     if (heat_map==1){
+      if (ER != "") gStyle->SetPalette(kSolar);
+      else if (NR != "") gStyle->SetPalette(kPigeon);
       hPSDenergy1->Draw("COLZ");
     }
     else hPSDenergy1->Draw();
@@ -308,7 +304,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     hRes1->Draw("same");
   }
 
-  //Graph5
+  //Graph5 (This code is duplicated in ConstCompare.c)
   TCanvas *c5 = new TCanvas("c5", "c5");
   if (ER != ""){
     //calculate error bars
@@ -342,39 +338,21 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
     text2.Draw();
   }
 
+
   //Step 4: Save stuff
   gSystem->Exec("mkdir Img/"+directory);
-  if (numFiles==1){
-    c2->SaveAs("Img/"+directory+"/"+evt_type+"R__PhotonsVsEnergy.png");
-    c4->SaveAs("Img/"+directory+"/"+evt_type+"R__residual.png");
-    if (evt_type=='E') c5->SaveAs("Img/"+directory+"/"+evt_type+"R__LeakageVsEnergy.png");
-    if (evt_type=='E') c6->SaveAs("Img/"+directory+"/"+evt_type+"R__fracBad"+name_fracBadER+".png");
-    else if (evt_type=='N') c6->SaveAs("Img/"+directory+"/"+evt_type+"R__fracBad"+name_fracBadNR+".png");
-    //add 'heatMap' to the file name if the graph is a heat map
-    if (heat_map==0){
-      c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD.png");
-      c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy.png");
-    }
-    else if (heat_map==1){
-      c1->SaveAs("Img/"+directory+"/"+evt_type+"R__TruePSDvsRecPSD_heatMap.png");
-      c3->SaveAs("Img/"+directory+"/"+evt_type+"R__RecPSDvsEnergy_heatMap.png");
-    }
-  }
-  else { //numfiles==2
-    c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");
-    c2->SaveAs("Img/"+directory+"/ER&NR__PhotonsVsEnergy.png");
-    c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");
-    c4->SaveAs("Img/"+directory+"/ER&NR__residual.png");
-    c5->SaveAs("Img/"+directory+"/"+evt_type+"R__LeakageVsEnergy.png");
-    c6->SaveAs("Img/"+directory+"/frazBadER"+name_fracBadER+"NR"+name_fracBadNR+".png");
-    //add 'heatMap' to the file name if the graph is a heat map
-    if (heat_map==0){
-      c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD.png");
-      c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy.png");
-    }
-    else if (heat_map==1){
-      c1->SaveAs("Img/"+directory+"/ER&NR__TruePSDvsRecPSD_heatMap.png");
-      c3->SaveAs("Img/"+directory+"/ER&NR__RecPSDvsEnergy_heatMap.png");
-    }
-  }
+  TString evts;
+  if (numFiles==1) evts = evt_type+"R";
+  else if (numFiles==2) evts = "ER&NR";
+  else evts = "";
+  TString heatMap;
+  if (heat_map==0) heatMap="";
+  else if (heat_map==1) heatMap="_heatMap";
+
+  c1->SaveAs("Img/"+directory+"/"+evts+"__TruePSDvsRecPSD"+heatMap+".png");
+  c2->SaveAs("Img/"+directory+"/"+evts+"__PhotonsVsEnergy.png");
+  c3->SaveAs("Img/"+directory+"/"+evts+"__RecPSDvsEnergy"+heatMap+".png");
+  c4->SaveAs("Img/"+directory+"/"+evts+"__residual.png");
+  if (evt_type=='E') c5->SaveAs("Img/"+directory+"/"+evts+"__LeakageVsEnergy.png");
+  c6->SaveAs("Img/"+directory+"/"+evts+"__fracBad.png");
 }

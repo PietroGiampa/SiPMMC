@@ -13,9 +13,8 @@
 //   4) TString evt_type: NR or ER       //
 //   5) edit other simulation parameters //
 //      in constants.c                   //
-//   6) run ReadOutput1.c and            //
-//      ReadOutput2.c on the data files  //
-//      to graph results                 //
+//   6) run ReadOutput.c on the data     //
+//      files to graph results           //
 //                                       //
 // root -l 'RunMC(<parameters>)'         //
 //---------------------------------------//

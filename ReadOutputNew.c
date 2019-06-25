@@ -130,7 +130,8 @@ void ReadOutputNew(int len, TString files[len], int heat_map=0, long total_evts=
 	leg1->Draw();
     }
     if (heat_map==1){
-	if (evt_type=='E') gStyle->SetPalette(kSolar);
+	if (evt_type=='E') gStyle->SetPalette(kCherry);
+	TColor::InvertPalette();
 	hPSD->Draw("COLZ same");
     }
     else hPSD->Draw("same"); //heat_map==0
@@ -187,7 +188,7 @@ void ReadOutputNew(int len, TString files[len], int heat_map=0, long total_evts=
         leg3->Draw();
     }
     if (heat_map==1){
-        if (evt_type=='E') gStyle->SetPalette(kSolar);
+        if (evt_type=='E') gStyle->SetPalette(kCherry);
         hPSDenergy->Draw("COLZ same");
     }
     else hPSDenergy->Draw("same"); //heat_map==0
@@ -299,7 +300,7 @@ void ReadOutputNew(int len, TString files[len], int heat_map=0, long total_evts=
 	if (evt_type=='E') hPSD->SetMarkerColor(kRed);
 	else if (evt_type=='N') hPSDenergy->SetMarkerColorAlpha(kBlack, 0.5); //not working
 	if (heat_map==1){
-	    if (evt_type=='E') gStyle->SetPalette(kSolar);
+	    if (evt_type=='E') gStyle->SetPalette(kCherry);
 	    hPSD->Draw("COLZ same");
 	}
 	else hPSD->Draw("same"); //heat_map==0
@@ -316,7 +317,7 @@ void ReadOutputNew(int len, TString files[len], int heat_map=0, long total_evts=
 	if (evt_type=='E') hPSDenergy->SetMarkerColor(kRed);
 	else if (evt_type=='N') hPSDenergy->SetMarkerColorAlpha(kBlack, 0.5); //not working
 	if (heat_map==1){
-	    if (evt_type=='E') gStyle->SetPalette(kSolar);
+	    if (evt_type=='E') gStyle->SetPalette(kCherry);
 	    hPSDenergy->Draw("COLZ same");
 	}
 	else hPSDenergy->Draw("same"); //heat_map==0

@@ -194,8 +194,9 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   if (numFiles==1){
     hPSD1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
     if (heat_map==1){
-      if (ER != "") gStyle->SetPalette(kSolar);
+      if (ER != "") gStyle->SetPalette(kCherry);
       else if (NR != "") gStyle->SetPalette(kPigeon);
+      TColor::InvertPalette();
       hPSD1->Draw("COLZ");}
     else hPSD1->Draw();
   }
@@ -203,7 +204,8 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   if (numFiles==2){
     hPSD1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
     if (heat_map==1){
-      gStyle->SetPalette(kSolar);
+      gStyle->SetPalette(kCherry);
+      TColor::InvertPalette();
       hPSD1->Draw("COLZ");}
     else hPSD1->Draw();
     hPSD2->SetMarkerColor(kBlack);
@@ -244,8 +246,12 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   if (numFiles==1){
     hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
     if (heat_map==1){
-      if (ER != "") gStyle->SetPalette(kSolar);
-      else if (NR != "") gStyle->SetPalette(kPigeon);
+      if (ER != ""){
+	gStyle->SetPalette(kCherry);
+      }
+      else if (NR != ""){
+	gStyle->SetPalette(kPigeon);
+      }
       hPSDenergy1->Draw("COLZ");
     }
     else hPSDenergy1->Draw();
@@ -268,7 +274,7 @@ void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0)
   if (numFiles==2){
     hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
     if (heat_map==1){
-      gStyle->SetPalette(kSolar);
+      gStyle->SetPalette(kCherry);
       hPSDenergy1->Draw("COLZ");
     }
     else hPSDenergy1->Draw();

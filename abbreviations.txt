@@ -1,0 +1,47 @@
+line numbers are from RunMC.c
+ap = after-pulse (another word for CDP)
+CDP: Correlated Delayed Pulse
+coll: collected/collection
+cov: coverage
+DAQ: Data Aquisition
+DN: Dark Noise
+e: energy
+eff: efficiency
+emi: emission
+ER: Electronic Recoil
+evt: event
+gen: generated? (line 271)
+h: histogram
+hist: histogram
+int: intermediate/integer/integration
+kk: just an integer to assist with the for loop, not an acronym 
+LAr: Liquid Argon
+max: maximum
+MC: Monte Carlo
+min: minimum
+n: number
+n_dn: number of dark noise-induced pulses 
+NR: Nuclear Recoil
+p: photons
+p_dn: probability given to a single dark noise pulse, this has to be < then the DN Rate prob for the DN pulse to be recorded.
+p0,p1,p2: parameters for the function that describes the CDP distributions (it's a convolution of 3 Poisson distributions)
+photo: photon?
+pht: photon
+PDE: Photon Detection Efficiency of SiPMs
+PDF: Probability Density Function
+pp_time: delta-time of the individual CDP pulse under investigation (primary pulse time?)
+prob: probability
+PSD: Pulse Shape Discrimination
+rec: recorded
+rnd: random
+scint: scintillation
+SiPM: Silicon Photomultiplier
+spu: spurious
+st: ? (line 147)
+TPB: Tetraphenyl-Butadiene wavelength shifter
+tru: true
+tw: time window
+u_pr: true singlet to triplet ratio before smearing
+WF: ? (line 319)
+wl: wavelength
+

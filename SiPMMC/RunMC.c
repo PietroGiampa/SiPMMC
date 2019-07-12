@@ -346,22 +346,23 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
       //If rec_psd==0|1, that means it's been reconstructed badly. We want to count how many events do that.
       if (rec_psd==0 | rec_psd==1) badPSD += 1;
 
-      //leakage is the proportion of ER events that are miscategorized as NR because their PSD is above the average NR PSD
-      //If rec_psd is >the average NR from YALE (and !=0|1), add the energy to leak_energy.
-      if (evt_type=="ER" & (energy_min >= 5) & (energy_max <= 56)){ //check if the energy range is within the YALE energy range
-	//find the correct energy bin
-	int bin = 5;
-	while (bin < (erecoil-1)){
-	  bin ++;
-	}
-	//check if the event contributes to leakage
-	long index = find(energy, energy+size, bin+0.5) - energy;
-	if (rec_psd>nuclear[index] & rec_psd!=0 & rec_psd!=1) leak_energy = erecoil;
-	else leak_energy = -1;
-	//count the number of good events
-	if (rec_psd!=0 & rec_psd!=1) tot_good_nrg = erecoil;
-	else tot_good_nrg = -1;
-      }
+// This is the old leakage procedure. Now I use a smooth line for the average NR PSD. It makes more sense to calculate leakage in ReadOutputNew.c anyway.
+//      //leakage is the proportion of ER events that are miscategorized as NR because their PSD is above the average NR PSD
+//      //If rec_psd is >the average NR from YALE (and !=0|1), add the energy to leak_energy.
+//      if (evt_type=="ER" & (energy_min >= 5) & (energy_max <= 56)){ //check if the energy range is within the YALE energy range
+//	//find the correct energy bin
+//	int bin = 5;
+//	while (bin < (erecoil-1)){
+//	  bin ++;
+//	}
+//	//check if the event contributes to leakage
+//	long index = find(energy, energy+size, bin+0.5) - energy;
+//	if (rec_psd>nuclear[index] & rec_psd!=0 & rec_psd!=1) leak_energy = erecoil;
+//	else leak_energy = -1;
+//	//count the number of good events
+//	if (rec_psd!=0 & rec_psd!=1) tot_good_nrg = erecoil;
+//	else tot_good_nrg = -1;
+//      }
 
       //Fill TTree
       SiPMmc->Fill();

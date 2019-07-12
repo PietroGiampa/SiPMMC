@@ -19,7 +19,7 @@ void ConstCompare(int len, TString files[len], long total_evts=0, TString var=""
 	}
     }
 
-    //check that they've input var correctly
+    //check that they've inpyt var correctly
     if ((var=="") & (len>1)){
 	cout << "Are you varying PDE or LC?" << endl;
 	exit(EXIT_FAILURE);
@@ -105,7 +105,6 @@ void ConstCompare(int len, TString files[len], long total_evts=0, TString var=""
       hLeakEnergy->SetMinimum(0.0000001);
     }
     hLeakEnergy->Divide(hEnergy);
-//for (int i=1;i<numbins+1;i++) cout << hLeakEnergy->GetXaxis()->GetBinCenter(i) << ": " << hLeakEnergy->GetBinContent(i) << endl;
     hLeakEnergy->GetYaxis()->SetLimits(0,1);
     hLeakEnergy->SetLineColor(colors[0]);
     hLeakEnergy->GetXaxis()->SetTitle("Recoil energy (keV)");

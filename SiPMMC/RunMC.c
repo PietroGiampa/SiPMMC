@@ -40,7 +40,7 @@
 #include "SiPMcdpPDF.c"
 #include "SiPMcdpHist.c"
 #include "GetFloatAsString.c"
-0#include "SiPMTimeResolution.c"
+#include "SiPMTimeResolution.c"
 #include "SingletToTripletFunction.c"
 #include "SingletToTripletYALE.c"
 #include "SingletToTripletSCENE.c"

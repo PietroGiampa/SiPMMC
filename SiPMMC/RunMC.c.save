@@ -19,19 +19,6 @@
 // root -l 'RunMC(<parameters>)'         //
 //---------------------------------------//
 
-//Steps
-// Loop through the events.  An event is a high-energy particle entering the detector.
-	//a)  A random energy is generated between energy_min and energy_max.
-	//b)  Use a gaussian (?)  prompt fraction distribution for NR and ER to randomly select a true prompt fraction based on the event energy.
-	//c)  The number of collected photons is reduced by the light coverage.
-	//d)  For each event, loop through the collected photons.
-		//i.  Based on the measured LAr emission spectrum, randomly select a wavelength.
-		//ii.  Using the prompt fraction, assign an emission time to the photon.
-		//iii.  Blur the emission time with the SiPM resolution.
-		//iv.  The number of detected photons is reduced by the photon detection efficiency.
-	//e)  Add correlated dark pulses and dark noise to the event.
-	//f)  Calculate the measured prompt fraction with all of the detector effects added in.
-
 //Include Function
 #include "constants.c"
 #include "DecayFunction.c"
@@ -104,7 +91,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   //Set the SiPM correlated delayed pulse PDF
   //This is based on the following paper:
   //https://arxiv.org/abs/1703.06204
-  TF1 *SiPMCDP = new TF1("SiPMCDP",SiPMcdpPDF,0,6000,6); //doesn't appear to be used
+  TF1 *SiPMCDP = new TF1("SiPMCDP",SiPMcdpPDF,0,6000,6);
   SiPMCDP->SetParameter(5,0.005);
   SiPMCDP->SetParameter(0,1.0);
   SiPMCDP->SetParameter(1,22);
@@ -129,7 +116,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   //Define TGraphErrors for mean Prompt Ratio
   //of singlet and triplet based on YALE paper
   TGraphErrors *gNR = SingletToTripletYALE("NR");
-  TGraphErrors *gNRs = SingletToTripletSCENE("NR"); //isn't used
+  TGraphErrors *gNRs = SingletToTripletSCENE("NR");
   TGraphErrors *gER = SingletToTripletYALE("ER");
 
   //Set Simulation SEED
@@ -152,7 +139,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   TString tpb = "";
   if (IsTPBon==1){tpb="TPBon";}
   else if (IsTPBon==0){tpb="TPBoff";}
-  TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+name_coll_eff+"_"+nSeed+"_"+tpb+"_"+evt_type+"_oldCDP.root";
+  TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+name_coll_eff+"_"+nSeed+"_"+tpb+"_"+evt_type+".root";
   TFile *fout = TFile::Open(filename,"recreate");
 
   //defining variables to save in the TTree
@@ -310,10 +297,8 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 	    {
 	      for (int ap=0; ap<n; ap++)
 		{
-//		  Double_t cdp_extra_time = time_window-time_trigger+1.;
-//                  while (cdp_extra_time>(time_window-time_trigger)){cdp_extra_time=hCDP->GetRandom();}
+
 		  double ap_time = pp_time + hCDP->GetRandom();
-//		  double ap_time = pp_time + cdp_extra_time;
 		  pht_st.push_back(ap_time);
 		}//end for loop
 	    }//end if-else loop

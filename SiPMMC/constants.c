@@ -2,6 +2,7 @@
 
 //https://arxiv.org/abs/1403.0525
 double photo_yield = 40.0; //LAr photo yield [photons/keV]
+//https://journals.aps.org/prb/abstract/10.1103/PhysRevB.27.5279
 double LAr_fast_t = 7.0; //LAr fast scintillation time const [ns]
 double LAr_slow_t = 1600.0; //LAr slow scintillation time const [ns]
 
@@ -16,13 +17,13 @@ double TPB_long_r = 0.08; //abundance
 double TPB_spu_r = 0.02; //abundance (abundances should add up to 1)
 
 //https://arxiv.org/abs/1903.03663
-double pde = 0.1; //photon detection efficiency
 double DN_rate = 0.2; //Hz/mm^2, for the Hamamatsu VUV4
 
 TRandom3 rnd;
 TRandom3 rndCDP;
 
 // set by user
+double pde = 0.1; //photon detection efficiency
 double coll_eff = 0.6; //detector collection efficiency [%] - light coverage/area coverage of photodetectors
 double overvoltage = 4.0; //Set the SiPM overvoltage [V]
 double time_window = 6000.0; //DAQ recording window [ns]

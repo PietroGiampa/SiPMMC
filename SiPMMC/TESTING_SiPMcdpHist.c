@@ -8,4 +8,8 @@ void TESTING_SiPMcdpHist(){
   c1->SetLogx();
   hCDP->Draw();
   c1->SaveAs("Img/SiPMcdpHist.png");
+
+  int tw_bin = hCDP->GetXaxis()->FindBin(time_window-time_trigger); //tw: time window; h, hist: histogram
+  double cdp_rate = hCDP->Integral(0,tw_bin)/1E9;
+  cout << "cdp_rate: " << cdp_rate << endl;
 }

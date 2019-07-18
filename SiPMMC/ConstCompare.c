@@ -105,7 +105,7 @@ void ConstCompare(int len, TString files[len], long total_evts=0, TString var=""
       hLeakEnergy->SetMinimum(0.0000001);
     }
     hLeakEnergy->Divide(hEnergy);
-//for (int i=1;i<numbins+1;i++) cout << "energy: " << hLeakEnergy->GetBinCenter(i)-0.25 << " leakage: " << hLeakEnergy->GetBinContent(i) << endl;
+for (int i=1;i<numbins+1;i++) cout << "energy: " << hLeakEnergy->GetBinCenter(i)-0.25 << " leakage: " << hLeakEnergy->GetBinContent(i) << endl;
     hLeakEnergy->GetYaxis()->SetLimits(0,1);
     hLeakEnergy->SetLineColor(colors[0]);
     hLeakEnergy->GetXaxis()->SetTitle("Recoil energy (keV)");

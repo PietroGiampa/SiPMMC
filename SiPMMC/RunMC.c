@@ -152,7 +152,7 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
   TString tpb = "";
   if (IsTPBon==1){tpb="TPBon";}
   else if (IsTPBon==0){tpb="TPBoff";}
-  TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+name_coll_eff+"_"+nSeed+"_"+tpb+"_"+evt_type+"_oldCDP.root";
+  TString filename = "Data/SiPM_"+num+"_"+name_pde+"_"+name_coll_eff+"_"+nSeed+"_"+tpb+"_"+evt_type+"_newCDP_newDN.root";
   TFile *fout = TFile::Open(filename,"recreate");
 
   //defining variables to save in the TTree
@@ -310,10 +310,10 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 	    {
 	      for (int ap=0; ap<n; ap++)
 		{
-//		  Double_t cdp_extra_time = time_window-time_trigger+1.;
-//                  while (cdp_extra_time>(time_window-time_trigger)){cdp_extra_time=hCDP->GetRandom();}
-		  double ap_time = pp_time + hCDP->GetRandom();
-//		  double ap_time = pp_time + cdp_extra_time;
+		  Double_t cdp_extra_time = time_window-time_trigger+1.;
+                  while (cdp_extra_time>(time_window-time_trigger)){cdp_extra_time=hCDP->GetRandom();}
+//		  double ap_time = pp_time + hCDP->GetRandom();
+		  double ap_time = pp_time + cdp_extra_time;
 		  pht_st.push_back(ap_time);
 		}//end for loop
 	    }//end if-else loop
@@ -374,9 +374,9 @@ void RunMC(long evt_max, int IsTPBon, int seed, TString evt_type)
 //	long index = find(energy, energy+size, bin+0.5) - energy;
 //	if (rec_psd>nuclear[index] & rec_psd!=0 & rec_psd!=1) leak_energy = erecoil;
 //	else leak_energy = -1;
-//	//count the number of good events
-//	if (rec_psd!=0 & rec_psd!=1) tot_good_nrg = erecoil;
-//	else tot_good_nrg = -1;
+	//count the number of good events
+	if (rec_psd!=0 & rec_psd!=1) tot_good_nrg = erecoil;
+	else tot_good_nrg = -1;
 //      }
 
       //Fill TTree

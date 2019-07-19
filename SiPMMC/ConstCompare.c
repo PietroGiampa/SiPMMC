@@ -99,6 +99,8 @@ void ConstCompare(int len, TString files[len], long total_evts=0, TString var=""
     c1->SetLogy();
     hLeak->Sumw2();
     hEnergy->Sumw2();
+//for (int i=1;i<numbins+1;i++) cout << "energy: " << hLeak->GetBinCenter(i)-0.25 << " leak: " << hLeak->GetBinContent(i) << endl;
+//for (int i=1;i<numbins+1;i++) cout << "energy: " << hEnergy->GetBinCenter(i)-0.25 << " tot_good_nrg: " << hEnergy->GetBinContent(i) << endl;
     hLeakEnergy = new TH1D(*hLeak);
     if (len>1){
       hLeakEnergy->SetMaximum(0.3);
@@ -114,6 +116,7 @@ for (int i=1;i<numbins+1;i++) cout << "energy: " << hLeakEnergy->GetBinCenter(i)
 	hLeakEnergy->SetTitle("Events: "+num+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
 	leg1 = new TLegend(.65,.89-0.03*len,.89,.89);
 	leg1->AddEntry(hLeakEnergy, "PDE: "+name_pde, "L");
+//	leg1->AddEntry(hLeakEnergy, "0", "L");
     }
     else if (var=="LC"){
 	hLeakEnergy->SetTitle("Events: "+num+", PDE: "+name_pde+", TPB: "+OnOff+", Type: "+evt_type+"R");
@@ -199,6 +202,8 @@ for (int i=1;i<numbins+1;i++) cout << "energy: " << hLeakEnergy->GetBinCenter(i)
 	if (evt_type=='E'){
 	    hLeakEnergy->Draw("E1same");
 	    if (var=="PDE") leg1->AddEntry(hLeakEnergy, "PDE: "+name_pde, "L");
+//	    TString name_i = Form("%id",i);
+//	    if (var=="PDE") leg1->AddEntry(hLeakEnergy, name_i, "L");
 	    else if (var=="LC") leg1->AddEntry(hLeakEnergy, " LC: "+name_coll_eff, "L");
 	    leg1->Draw("same");
 	}

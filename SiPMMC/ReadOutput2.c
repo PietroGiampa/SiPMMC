@@ -7,18 +7,24 @@
 //#include <math.h>
 # include "nr50.c"
 
-void ReadOutputNew(int len, TString files[len], long total_evts=0, int heat_map=0){
+void ReadOutput2(TString file1="", TString file2="", long total_evts=0, int heat_map=0){
+
+    int len;
+    if (file1 == "" & file2 == ""){
+	cout << "Please input at least one file." << endl;
+	exit(EXIT_FAILURE);
+    }
+    else if (file1 == "" | file2 == "") len = 1;
+    else len = 2;
 
     //check that they've input total_evts correctly
-    for (int i=0;i<len;i++){
-        if (files[i].Contains("-") & (total_evts==0)){
+    if ((file1.Contains("-") | file2.Contains("-")) & (total_evts==0)){
             cout << "If the data file is a combination of multiple simulations, you must set total_evts." << endl;
             exit(EXIT_FAILURE);
         }
-    }
 
     //check that files are in the correct order
-    if ((len==2) & files[0].Contains("NR") * files[1].Contains("ER")){
+    if ((len==2) & file1.Contains("NR") & file2.Contains("ER")){
 	cout << "If inputting both ER and NR, ER should be first." << endl;
 	exit(EXIT_FAILURE);
     }
@@ -35,7 +41,7 @@ void ReadOutputNew(int len, TString files[len], long total_evts=0, int heat_map=
     TFile *fileIN;
     TTree *SiPMmc;
 
-    fileIN = TFile::Open(files[0]);
+    fileIN = TFile::Open(file1);
     SiPMmc = (TTree*)fileIN->Get("SiPMmc");
     SiPMmc->SetBranchAddress("tru_psd",&tru_psd);
     SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
@@ -68,7 +74,7 @@ void ReadOutputNew(int len, TString files[len], long total_evts=0, int heat_map=
     else if (tpb==1) OnOff="on";
 
     TString directory;
-    directory = files[0];
+    directory = file1;
     directory.ReplaceAll("_ER","");
     directory.ReplaceAll("_NR","");
     directory.ReplaceAll("Data/","");
@@ -245,10 +251,10 @@ void ReadOutputNew(int len, TString files[len], long total_evts=0, int heat_map=
     text2->SetTextSize(0.03);
     text2->Draw("same");
 
-    //Step 2: read and plot the rest of the files
-    for (int i=1;i<len;i++){
+    //Step 2: read and plot the second file
+    if (len==2){
 	//A: Read in the data file
-	fileIN = TFile::Open(files[i]);
+	fileIN = TFile::Open(file2);
 	SiPMmc = (TTree*)fileIN->Get("SiPMmc");
 	SiPMmc->SetBranchAddress("tru_psd",&tru_psd);
 	SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
@@ -355,7 +361,7 @@ void ReadOutputNew(int len, TString files[len], long total_evts=0, int heat_map=
 	fracBad = double(badPSD)/double(total_evts);
 	name_fracBad = Form("%fd", fracBad);
 	cout<<"Events: "<<total_evts<<", PDE: "<<pde<<", Light coverage: "<<coll_eff<<", TPB: "<<OnOff<<", Type: "<<evt_type<<"R, fracBad: "<<fracBad<<endl;
-	text2 = new TLatex(0.02, 0.8-(0.1*i), "Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R, fracBad: "+name_fracBad);
+	text2 = new TLatex(0.02, 0.6, "Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R, fracBad: "+name_fracBad);
 	text2->SetTextSize(0.03);
 	text2->Draw("same");
 

@@ -1,364 +1,402 @@
-//Takes one or two data files from RunMC.c.
-//With two files, assumes that both have the same constants.
-//If each data file comes from one simulation (there is one seed in the file name), don't use total_evts.
-//If each data file is a combination of multiple simulations (there are multiple seeds in the file name), set total_evts to the sum of the events from all
-//	of the simulations (should be the first number in the file name).
-//Default graph type is scatter plot. Set heat_map==1 to make a heat map.
-//If inputting only NR, you must pass "" to ER.
-
-//Creates a graph of true PSD vs recorded PSD, detected photons vs energy, recorded PSD vs energy, a histogram of residual, and leakage vs energy. Calculates the
-//	fraction of events that have a PSD of zero or 1.
+//This will be an attempt to implement ReadOutput.c using the same strategy as ConstCompare.c. If successful, this file can be merged with ConstCompare.c.
+//TO RUN: define a TString array in the root terminal, then pass that into the function. (I don't know why it doesn't work otherwise)
 
 #include "MakeList.c"
-#include "SingletToTripletYALE.c"
+//#include "SingletToTripletYALE.c"
 #include "GetFloatAsString.c"
+//#include <math.h>
+# include "nr50.c"
 
-void ReadOutput(TString ER="", TString NR="", long total_evts=0, int heat_map=0){
+void ReadOutput2(TString file1="", TString file2="", long total_evts=0, int heat_map=0){
 
-  int numFiles;
-  if (ER == "" & NR == ""){
-    cout << "Please input at least one file." << endl;
-    exit(EXIT_FAILURE);}
-  else if (ER == "" | NR == "") numFiles = 1;
-  else numFiles = 2;
+    int len;
+    if (file1 == "" & file2 == ""){
+	cout << "Please input at least one file." << endl;
+	exit(EXIT_FAILURE);
+    }
+    else if (file1 == "" | file2 == "") len = 1;
+    else len = 2;
 
-  //check that they've input total_evts correctly
-  if ((ER.Contains("-") | NR.Contains("-")) & (total_evts==0)){
-    cout << "If the data file is a combination of multiple simulations, you must set total_evts." << endl;
-    exit(EXIT_FAILURE);}
+    //check that they've input total_evts correctly
+    if ((file1.Contains("-") | file2.Contains("-")) & (total_evts==0)){
+            cout << "If the data file is a combination of multiple simulations, you must set total_evts." << endl;
+            exit(EXIT_FAILURE);
+        }
 
-  //Step 1: Read in the data files
-  //Define the data variables
-  Double_t tru_psd1, rec_psd1, residual1, erecoil1, leak_energy1, tot_good_nrg1;
-  Int_t n_coll_p1, badPSD1;
-  constant_list constants1;
-  Double_t tru_psd2, rec_psd2, residual2, erecoil2;
-  Int_t n_coll_p2, badPSD2;
-  constant_list constants2;
-  Long_t evt_max;
-  Double_t energy_min, energy_max, pde, coll_eff, photo_yield;
-  Int_t tpb;
-  TString evt_type;
-  TTree *SiPMmc1;
-  TTree *SiPMmc2;
+    //check that files are in the correct order
+    if ((len==2) & file1.Contains("NR") & file2.Contains("ER")){
+	cout << "If inputting both ER and NR, ER should be first." << endl;
+	exit(EXIT_FAILURE);
+    }
 
-  //read in the ER data file
-  if (ER != ""){
-    TFile *fileIN1 = TFile::Open(ER);
-    SiPMmc1 = (TTree*)fileIN1->Get("SiPMmc");
-    //fetch the necessary stuff from the ER data file
-    SiPMmc1->SetBranchAddress("tru_psd",&tru_psd1);
-    SiPMmc1->SetBranchAddress("rec_psd",&rec_psd1);
-    SiPMmc1->SetBranchAddress("residual",&residual1);
-    SiPMmc1->SetBranchAddress("n_coll_p",&n_coll_p1);
-    SiPMmc1->SetBranchAddress("erecoil",&erecoil1);
-    SiPMmc1->SetBranchAddress("leak_energy",&leak_energy1);
-    SiPMmc1->SetBranchAddress("tot_good_nrg",&tot_good_nrg1);
-    SiPMmc1->SetBranchAddress("badPSD",&badPSD1);
-    SiPMmc1->SetBranchAddress("constants", (Long64_t*)(&constants1));
+    //Step 1: Plot the first file with title and axis labels
+    //A: Read in the data file
+    double tru_psd, rec_psd, residual, erecoil, leak_energy, tot_good_nrg;
+    int n_coll_p, badPSD;
+    constant_list constants;
+    long evt_max;
+    double energy_min, energy_max, pde, coll_eff, photo_yield;
+    int tpb;
+    TString evt_type;
+    TFile *fileIN;
+    TTree *SiPMmc;
+
+    fileIN = TFile::Open(file1);
+    SiPMmc = (TTree*)fileIN->Get("SiPMmc");
+    SiPMmc->SetBranchAddress("tru_psd",&tru_psd);
+    SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
+    SiPMmc->SetBranchAddress("residual",&residual);
+    SiPMmc->SetBranchAddress("n_coll_p",&n_coll_p);
+    SiPMmc->SetBranchAddress("erecoil",&erecoil);
+    SiPMmc->SetBranchAddress("tot_good_nrg",&tot_good_nrg);
+    SiPMmc->SetBranchAddress("badPSD",&badPSD);
+    SiPMmc->SetBranchAddress("constants", (Long64_t*)(&constants));
     //load the constants
-    //I'm not sure if the SiPMmc1->GetEntry(n) is necessary, but as long as it works I won't change it.
+    //I'm not sure if the SiPMmc->GetEntry(n) is necessary, but as long as it works I won't change it.
     //if using two files or only using ER, use the constants from ER
-    SiPMmc1->GetEntry(0); evt_max = constants1.evts;
+    SiPMmc->GetEntry(0); evt_max = constants.evts;
     if (total_evts==0) total_evts = evt_max;
-    SiPMmc1->GetEntry(1); energy_min = constants1.eMin;
-    SiPMmc1->GetEntry(2); energy_max = constants1.eMax;
-    SiPMmc1->GetEntry(3); pde = constants1.SiPM_pde;
-    SiPMmc1->GetEntry(4); coll_eff = constants1.light_cov;
-    SiPMmc1->GetEntry(5); photo_yield = constants1.yield;
-    SiPMmc1->GetEntry(6); tpb = constants1.tpbOnOff;
-    SiPMmc1->GetEntry(7); evt_type = constants1.recoil;
-  }
+    SiPMmc->GetEntry(1); energy_min = constants.eMin;
+    SiPMmc->GetEntry(2); energy_max = constants.eMax;
+    SiPMmc->GetEntry(3); pde = constants.SiPM_pde;
+    SiPMmc->GetEntry(4); coll_eff = constants.light_cov;
+    SiPMmc->GetEntry(5); photo_yield = constants.yield;
+    SiPMmc->GetEntry(6); tpb = constants.tpbOnOff;
+    SiPMmc->GetEntry(7); evt_type = constants.recoil;
 
-  //read in the NR data file
-  if (NR != ""){
-    TFile *fileIN2 = TFile::Open(NR);
-    SiPMmc2 = (TTree*)fileIN2->Get("SiPMmc");
-    //fetch the necessary stuff from the NR data file
-    SiPMmc2->SetBranchAddress("tru_psd",&tru_psd2);
-    SiPMmc2->SetBranchAddress("rec_psd",&rec_psd2);
-    SiPMmc2->SetBranchAddress("residual",&residual2);
-    SiPMmc2->SetBranchAddress("n_coll_p",&n_coll_p2);
-    SiPMmc2->SetBranchAddress("erecoil",&erecoil2);
-    SiPMmc2->SetBranchAddress("badPSD",&badPSD2);
-    SiPMmc2->SetBranchAddress("constants", (Long64_t*)(&constants2));
-    //load the constants
-    //if you're only using NR, use these constants
-    if (ER == ""){
-      SiPMmc2->GetEntry(0); Long_t evt_max = constants2.evts;
-      if (total_evts==0) total_evts = evt_max;
-      SiPMmc2->GetEntry(1); energy_min = constants2.eMin;
-      SiPMmc2->GetEntry(2); energy_max = constants2.eMax;
-      SiPMmc2->GetEntry(3); pde = constants2.SiPM_pde;
-      SiPMmc2->GetEntry(4); coll_eff = constants2.light_cov;
-      SiPMmc2->GetEntry(5); photo_yield = constants2.yield;
-      SiPMmc2->GetEntry(6); tpb = constants2.tpbOnOff;
-      SiPMmc2->GetEntry(7); evt_type = constants2.recoil;
-    }
-  }
+    //B: format
+    //change constants into strings
+    TString num = Form("%ld",total_evts);
+    TString name_pde = Form("%fd",pde);
+    TString name_coll_eff = Form("%fd",coll_eff);
+    string OnOff;
+    if (tpb==0) OnOff="off";
+    else if (tpb==1) OnOff="on";
 
-  //Check that they've passed NR correctly
-  if ((NR=="") & (evt_type=='N')){
-    cout << "If inputting only NR, you must pass \"\" to ER." << endl;
-    exit(EXIT_FAILURE);}
-
-
-  //Step 2: format
-  //change constants into strings
-  TString num = Form("%ld",total_evts);
-  TString name_pde = Form("%fd",pde);
-  TString name_coll_eff = Form("%fd",coll_eff);
-  string OnOff;
-  if (tpb==0){OnOff="off";}
-  else if (tpb==1){OnOff="on";}
-
-  //format file name to use later
-  TString directory;
-  if (ER != ""){
-    directory = ER;
+    TString directory;
+    directory = file1;
     directory.ReplaceAll("_ER","");
-  }
-  else{
-    directory = NR;
     directory.ReplaceAll("_NR","");
-  }
-  directory.ReplaceAll("Data/","");
-  directory.ReplaceAll(".root","");
+    directory.ReplaceAll("Data/","");
+    directory.ReplaceAll(".root","");
 
-  //get rid of the stats box
-  gStyle->SetOptStat(0);
-
-
-  //Step 3: Graphing
-  //Graph1: true PSD vs recorded PSD
-  TH2D *hPSD1 = new TH2D("hPSD1","",100,-0.02,1.02,100,0,1);
-  //Graph2: detected photons vs energy
-  double max_ph = energy_max*photo_yield*coll_eff;
-  TH2D *hPhotons1 = new TH2D("hphotons1", "", 100, energy_min, energy_max, 100, 0, max_ph+50);
-  //Graph3: recorded PSD vs energy
-  TH2D *hPSDenergy1 = new TH2D("hPSDenergy1", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
-  //Graph4: histogram of residual
-  TH1D *hRes1 = new TH1D("hRes1","",100, 0, 1);
-  //Graph5: leakage vs energy
-  double numbins = (energy_max-energy_min)*2.0;
-  TH1D *hLeak = new TH1D("hLeak","",numbins,energy_min,energy_max);
-  TH1D *hEnergy = new TH1D("hEnergy","",numbins,energy_min,energy_max);
-
-  TH2D *hPSD2;
-  TH2D *hPhotons2;
-  TH2D *hPSDenergy2;
-  TH1D *hRes2;
-  if (numFiles==2){
-    hPSD2 = new TH2D("hPSD2","",100,-0.02,1.02,100,0,1);
-    hPhotons2 = new TH2D("hphotons2", "", 100, energy_min, energy_max, 100, 0, max_ph+50);
-    hPSDenergy2 = new TH2D("hPSDenergy2", "", 100, energy_min, energy_max, 100, -0.02, 1.02);
-    hRes2 = new TH1D("hRes2","",100, 0, 1);
-  }
+    //get rid of the stats box
+    gStyle->SetOptStat(0);
 
 
-  //loop through all of the events and add them to the graphs
-  for (int i=0; i<total_evts; i++){
-    if (ER != ""){
-      SiPMmc1->GetEntry(i);
-      hPSD1->Fill(rec_psd1,tru_psd1);
-      hPhotons1->Fill(erecoil1,n_coll_p1);
-      hPSDenergy1->Fill(erecoil1,rec_psd1);
-      hRes1->Fill(residual1);
-      hLeak->Fill(leak_energy1);
-      hEnergy->Fill(tot_good_nrg1);
+    //C: graphing
+    TH2D *hPSD = new TH2D("hPSD","",100,-0.02,1.02,100,0.,1.); //Graph1
+    double max_ph = energy_max*photo_yield*coll_eff;
+    TH2D *hPhotons = new TH2D("hphotons", "", 100, energy_min, energy_max, 100, 0., max_ph+50.); //Graph2
+    TH2D *hPSDenergy = new TH2D("hPSDenergy", "", 100, energy_min, energy_max, 100, -0.02, 1.02); //Graph3
+    TH1D *hRes = new TH1D("hRes","",100, 0., 1.); //Graph4
+//    long height = 14512.68*pow(coll_eff,0.5623)*pow(pde,0.4819)*(0.072*total_evts + 40.994);
+    long height = (2590*coll_eff)*(7300*pde)*(0.158*total_evts)/4200000;
+    if (len==2) hRes->SetMaximum(height);
+    double numbins = (energy_max-energy_min)*2.0;
+    TH1D *hLeak = new TH1D("hLeak","",numbins,energy_min,energy_max); //Graph5
+    TH1D *hEnergy = new TH1D("hEnergy","",numbins,energy_min,energy_max); //Graph5
+
+    double nr50;
+    //loop through all of the events and add them to the graphs
+    for (int i=0; i<total_evts; i++){
+	SiPMmc->GetEntry(i);
+	hPSD->Fill(rec_psd,tru_psd);
+	hPhotons->Fill(erecoil,n_coll_p);
+	hPSDenergy->Fill(erecoil,rec_psd);
+	hRes->Fill(residual);
+	nr50 = exp_fit(&erecoil,pars);
+        if (rec_psd>nr50 & rec_psd!=0 & rec_psd!=1) leak_energy = erecoil;
+        else leak_energy = -1;
+        hLeak->Fill(leak_energy);
+	hEnergy->Fill(tot_good_nrg);
     }
-    if (numFiles==2){
-      SiPMmc2->GetEntry(i);
-      hPSD2->Fill(rec_psd2,tru_psd2);
-      hPhotons2->Fill(erecoil2,n_coll_p2);
-      hPSDenergy2->Fill(erecoil2,rec_psd2);
-      hRes2->Fill(residual2);
-    }
-    else if (ER == ""){ //NR != ""
-      SiPMmc2->GetEntry(i);
-      hPSD1->Fill(rec_psd2,tru_psd2);
-      hPhotons1->Fill(erecoil2,n_coll_p2);
-      hPSDenergy1->Fill(erecoil2,rec_psd2);
-      hRes1->Fill(residual2);
-    }
-  }
 
+    //declaring stuff
+    TGraphErrors *ER = new TGraphErrors(); ER->SetFillColor(kRed); //stuff of the appropriate colour to add to the legend
+    TGraphErrors *NR = new TGraphErrors(); NR->SetFillColor(kBlack);
+    TCanvas *c1, *c2, *c3, *c4, *c5, *c6;
+    TLegend *leg1=new TLegend(0.,0.,0.,0.), *leg3=new TLegend(0.,0.,0.,0.), *leg4=new TLegend(0.,0.,0.,0.);
+    TF1 *line1;
+//    TGraph *line3;
+    TF1 *line3;
+    TH1D *hLeakEnergy;
+    double fracBad;
+    TString name_fracBad;
 
-  //Graph1
-  TCanvas *c1 = new TCanvas("c1","c1");
-  if (ER != ""){
-    hPSD1->SetMarkerColor(kRed);
-    hPSD1->SetFillColor(kRed);}
-  hPSD1->GetXaxis()->SetTitle("Recorded PSD");
-  hPSD1->GetYaxis()->SetTitle("True PSD");
-  if (numFiles==1){
-    hPSD1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+    //Graph1: true PSD vs recorded PSD
+    //if ER/NR comparison
+    c1 = new TCanvas("c1","c1");
+    hPSD->GetXaxis()->SetTitle("Recorded prompt fraction");
+    hPSD->GetYaxis()->SetTitle("True prompt fraction");
+    if (evt_type=='E') hPSD->SetMarkerColor(kRed);
+    if (len==1){
+	hPSD->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+        if (evt_type=='N'){
+	    hPSDenergy->SetMarkerColor(kBlack);
+	    if (heat_map==1){
+		gStyle->SetPalette(kPigeon);
+		TColor::InvertPalette();
+	    }
+	}
+    }
+    else { //len==2
+	hPSD->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff);
+        if (evt_type=='N') hPSD->SetMarkerColorAlpha(kBlack, 0.5); //not working to make it translucent
+	leg1 = new TLegend(.13,.68,.30,.88);
+	leg1->AddEntry(ER, "ER", "F");
+	leg1->AddEntry(NR, "NR", "F");
+    }
     if (heat_map==1){
-      if (ER != "") gStyle->SetPalette(kCherry);
-      else if (NR != "") gStyle->SetPalette(kPigeon);
-      TColor::InvertPalette();
-      hPSD1->Draw("COLZ");}
-    else hPSD1->Draw();
-  }
-  TLegend *leg1;
-  if (numFiles==2){
-    hPSD1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
+	if (evt_type=='E'){
+	    gStyle->SetPalette(kCherry);
+	    TColor::InvertPalette();
+	}
+	hPSD->Draw("COLZ");
+    }
+    else hPSD->Draw();
+    //add a y=x line
+    line1 = new TF1("line","x",-0.02,1.02);
+    line1->SetLineColor(kBlue);
+
+    //Graph2: detected photons vs energy
+    //if ER/NR comparison
+    c2 = new TCanvas("c2","c2");
+    hPhotons->GetXaxis()->SetTitle("Recoil energy (keV)");
+    hPhotons->GetYaxis()->SetTitle("Number of collected photons");
+    if (evt_type=='E') hPhotons->SetMarkerColor(kRed);
+    else hPSD->SetMarkerColor(kBlack); //evt_type=='N'
+    if (len==1)	hPhotons->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+    else {//len==2
+	hPhotons->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff); //len==2
+    }
+    hPhotons->Draw();
+
+    //Graph3: recorded PSD vs energy
+    //if ER/NR comparison
+    c3 = new TCanvas("c3","c3");
+    //add a SingletToTripletYale line
+    line3 = new TF1("nr50",exp_fit,energy_min,energy_max,4);
+    for (int i=0;i<4;i++) line3->SetParameter(i,pars[i]);
+    line3->SetLineColor(kBlue);
+    line3->SetLineWidth(3);
+    hPSDenergy->GetXaxis()->SetTitle("Recoil energy (keV)");
+    hPSDenergy->GetYaxis()->SetTitle("Recorded prompt fraction");
+    if (evt_type=='E') hPSDenergy->SetMarkerColor(kRed);
+    if (len==1){
+        hPSDenergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+	if (evt_type=='N'){
+	    hPSDenergy->SetMarkerColor(kBlack);
+            if (heat_map==1) gStyle->SetPalette(kPigeon);
+	}
+    }
+    else { //len==2
+        hPSDenergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff);
+	if (evt_type=='N') hPSDenergy->SetMarkerColorAlpha(kBlack, 0.5); //not working
+	//legend
+        leg3 = new TLegend(.88,.35,.70,.11);
+        leg3->AddEntry(ER, "ER", "F");
+        leg3->AddEntry(NR, "NR", "F");
+	leg3->AddEntry(line3, "50% NR", "L");
+    }
     if (heat_map==1){
-      gStyle->SetPalette(kCherry);
-      TColor::InvertPalette();
-      hPSD1->Draw("COLZ");}
-    else hPSD1->Draw();
-    hPSD2->SetMarkerColor(kBlack);
-    hPSD2->SetFillColor(kBlack);
-    hPSD2->Draw("same");
-    //add a legend
-    leg1 = new TLegend(.13,.68,.3,.88);
-    leg1->AddEntry(hPSD1, "ER", "F");
-    leg1->AddEntry(hPSD2, "NR", "F");
+        if (evt_type=='E') gStyle->SetPalette(kCherry);
+        hPSDenergy->Draw("COLZ");
+    }
+    else hPSDenergy->Draw();
+
+    //Graph4: histogram of residual
+    c4 = new TCanvas("c4", "c4");
+    //calculate height of NR peak
+//    long height = 14512.68*pow(coll_eff,0.5623)*pow(pde,0.4819)*(0.072*total_evts + 40.994);
+//    hRes->GetYaxis()->SetLimits(0,height);
+//    hRes->SetMaximum(height);
+    hRes->GetXaxis()->SetTitle("Prompt fraction Residual");
+    hRes->GetYaxis()->SetTitle("number of events");
+    if (evt_type=='E') hRes->SetLineColor(kRed);
+    else hRes->SetLineColor(kBlack); //evt_type=='N'
+    if (len==1) hRes->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+    else {
+        hRes->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff); //len==2
+	leg4 = new TLegend(.88,.72,.74,.89);
+	leg4->AddEntry(ER, "ER", "F");
+	leg4->AddEntry(NR, "NR", "F");
+    }
+    hRes->Draw();
+
+    //Graph5: leakage vs energy
+    c5 = new TCanvas("c5", "c5");
+    if (evt_type=='E'){
+	c5->SetLogy();
+	//calculate error bars
+	hLeak->Sumw2();
+	hEnergy->Sumw2();
+	hLeakEnergy = new TH1D(*hLeak);
+	hLeakEnergy->Divide(hEnergy);
+	hLeakEnergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+	hLeakEnergy->GetXaxis()->SetTitle("Recoil energy (keV)");
+	hLeakEnergy->GetYaxis()->SetTitle("Leakage");
+	hLeakEnergy->Draw("E1");
+    }
+
+    //Canvas6: Fraction of events with prompt fraction zero or 1
+    c6 = new TCanvas("c6", "c6");
+    fracBad = double(badPSD)/double(total_evts);
+    name_fracBad = Form("%fd", fracBad);
+    cout << "The fraction of events with prompt fraction zero or one" << endl;
+    cout<<"Events: "<<total_evts<<", PDE: "<<pde<<", Light coverage: "<<coll_eff<<", TPB: "<<OnOff<<", Type: "<<evt_type<<"R, fracBad: "<<fracBad<<endl;
+    TLatex *text1 = new TLatex(0.02, 0.9, "The fraction of events with prompt fraction zero or one");
+    text1->Draw();
+    TLatex *text2 = new TLatex(0.02, 0.8, "Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R, fracBad: "+name_fracBad);
+    text2->SetTextSize(0.03);
+    text2->Draw("same");
+
+    //Step 2: read and plot the second file
+    if (len==2){
+	//A: Read in the data file
+	fileIN = TFile::Open(file2);
+	SiPMmc = (TTree*)fileIN->Get("SiPMmc");
+	SiPMmc->SetBranchAddress("tru_psd",&tru_psd);
+	SiPMmc->SetBranchAddress("rec_psd",&rec_psd);
+	SiPMmc->SetBranchAddress("residual",&residual);
+	SiPMmc->SetBranchAddress("n_coll_p",&n_coll_p);
+	SiPMmc->SetBranchAddress("erecoil",&erecoil);
+	SiPMmc->SetBranchAddress("tot_good_nrg",&tot_good_nrg);
+	SiPMmc->SetBranchAddress("badPSD",&badPSD);
+	SiPMmc->SetBranchAddress("constants", (Long64_t*)(&constants));
+	//load the constants
+	SiPMmc->GetEntry(0); evt_max = constants.evts;
+	if (total_evts==0) total_evts = evt_max;
+	SiPMmc->GetEntry(1); energy_min = constants.eMin;
+	SiPMmc->GetEntry(2); energy_max = constants.eMax;
+	SiPMmc->GetEntry(3); pde = constants.SiPM_pde;
+	SiPMmc->GetEntry(4); coll_eff = constants.light_cov;
+	SiPMmc->GetEntry(5); photo_yield = constants.yield;
+	SiPMmc->GetEntry(6); tpb = constants.tpbOnOff;
+	SiPMmc->GetEntry(7); evt_type = constants.recoil;
+
+	//B: format
+	//change constants into strings
+	TString num = Form("%ld",total_evts);
+	TString name_pde = Form("%fd",pde);
+	TString name_coll_eff = Form("%fd",coll_eff);
+	string OnOff;
+	if (tpb==0) OnOff="off";
+	else if (tpb==1) OnOff="on";
+
+	//C: graphing
+	hPSD = new TH2D("hPSD","",100,-0.02,1.02,100,0,1); //Graph1
+	max_ph = energy_max*photo_yield*coll_eff;
+	hPhotons = new TH2D("hphotons", "", 100, energy_min, energy_max, 100, 0, max_ph+50); //Graph2
+	hPSDenergy = new TH2D("hPSDenergy", "", 100, energy_min, energy_max, 100, -0.02, 1.02); //Graph3
+	hRes = new TH1D("hRes","",100, 0, 1); //Graph4
+	numbins = (energy_max-energy_min)*2.0;
+	hLeak = new TH1D("hLeak","",numbins,energy_min,energy_max); //Graph5
+	hEnergy = new TH1D("hEnergy","",numbins,energy_min,energy_max); //Graph5
+
+	//loop through all of the events and add them to the graphs
+	for (int i=0; i<total_evts; i++){
+	    SiPMmc->GetEntry(i);
+	    hPSD->Fill(rec_psd,tru_psd);
+	    hPhotons->Fill(erecoil,n_coll_p);
+	    hPSDenergy->Fill(erecoil,rec_psd);
+	    hRes->Fill(residual);
+	    nr50 = exp_fit(&erecoil,pars);
+            if (rec_psd>nr50 & rec_psd!=0 & rec_psd!=1) leak_energy = erecoil;
+            else leak_energy = -1;
+            hLeak->Fill(leak_energy);
+	    hEnergy->Fill(tot_good_nrg);
+	}
+
+	//Graph1: true PSD vs recorded PSD
+	//if ER/NR comparison
+	c1->cd();
+	if (evt_type=='E') hPSD->SetMarkerColor(kRed);
+	else if (evt_type=='N') hPSDenergy->SetMarkerColorAlpha(kBlack, 0.5); //not working
+	if (heat_map==1){
+	    if (evt_type=='E') gStyle->SetPalette(kCherry);
+	    hPSD->Draw("COLZ same");
+	}
+	else hPSD->Draw("same"); //heat_map==0
+
+	//Graph2: detected photons vs energy
+	//if ER/NR comparison
+	c2->cd();
+	if (evt_type=='E') hPSDenergy->SetMarkerColor(kRed);
+	else hPSD->SetMarkerColor(kBlack); //evt_type=='N'
+	hPhotons->Draw("same");
+
+	//Graph3
+	c3->cd();
+	if (evt_type=='E') hPSDenergy->SetMarkerColor(kRed);
+	else if (evt_type=='N') hPSDenergy->SetMarkerColorAlpha(kBlack, 0.5); //not working
+	if ((heat_map==1) & evt_type=='E'){
+	    gStyle->SetPalette(kCherry);
+	    TColor::InvertPalette();
+	    hPSDenergy->Draw("COLZ same");
+	}
+	else hPSDenergy->Draw("same"); //heat_map==0
+
+	//Graph4: histogram of residual
+	c4->cd();
+	if (evt_type=='E') hRes->SetLineColor(kRed);
+	else hRes->SetLineColor(kBlack); //evt_type=='N'
+	hRes->Draw("same");
+
+	//Graph5: leakage vs energy
+	c5->cd();
+	if (evt_type=='E'){
+	    hLeak->Sumw2();
+	    hEnergy->Sumw2();
+	    hLeakEnergy = new TH1D(*hLeak);
+	    hLeakEnergy->Divide(hEnergy);
+	    hLeakEnergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
+	    hLeakEnergy->GetXaxis()->SetTitle("Recoil energy (keV)");
+	    hLeakEnergy->GetYaxis()->SetTitle("Leakage");
+	    hLeakEnergy->Draw("E1 same");
+	}
+
+	//Canvas6: Fraction of events with PSD zero or 1
+	c6->cd();
+	fracBad = double(badPSD)/double(total_evts);
+	name_fracBad = Form("%fd", fracBad);
+	cout<<"Events: "<<total_evts<<", PDE: "<<pde<<", Light coverage: "<<coll_eff<<", TPB: "<<OnOff<<", Type: "<<evt_type<<"R, fracBad: "<<fracBad<<endl;
+	text2 = new TLatex(0.02, 0.6, "Events: "+num+", PDE: "+name_pde+", Light coverage: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R, fracBad: "+name_fracBad);
+	text2->SetTextSize(0.03);
+	text2->Draw("same");
+
+	//graphs from ConstCompare
+
+    }
+
+    //draw lines and legends last so that they're on top
+    c1->cd();
     leg1->Draw("same");
-  }
-  //add a y=x line
-  TF1 *line1 = new TF1("line","x",-0.02,1.02);
-  line1->SetLineColor(kBlue);
-  line1->Draw("same");
-
-  //Graph2
-  TCanvas *c2 = new TCanvas("c2","c2");
-  if (ER != "") hPhotons1->SetMarkerColor(kRed);
-  hPhotons1->GetXaxis()->SetTitle("Recoil energy (keV)");
-  hPhotons1->GetYaxis()->SetTitle("Number of collected photons");
-  if (numFiles==1){
-    hPhotons1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
-    hPhotons1->Draw();}
-  else { //if (numFiles==2)
-    hPhotons1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
-    hPhotons1->Draw();
-    hPhotons2->SetMarkerColor(kBlack);
-    hPhotons2->Draw("same");
+    line1->Draw("same");
+    c2->cd();
     leg1->Draw("same");
-  }
-
-  //Graph3
-  TCanvas *c3 = new TCanvas("c3","c3");
-  if (ER != "") hPSDenergy1->SetMarkerColor(kRed);
-  hPSDenergy1->GetXaxis()->SetTitle("Recoil energy (keV)");
-  hPSDenergy1->GetYaxis()->SetTitle("Recorded PSD");
-  if (numFiles==1){
-    hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
-    if (heat_map==1){
-      if (ER != ""){
-	gStyle->SetPalette(kCherry);
-      }
-      else if (NR != ""){
-	gStyle->SetPalette(kPigeon);
-      }
-      hPSDenergy1->Draw("COLZ");
-    }
-    else hPSDenergy1->Draw();
-  }
-  //add a SingletToTripletYale line; it's stepped because that's how I implemented the leakage cut.
-  double energyLine[2*size];
-  double nuclearLine[2*size];
-  for (int i=0;i<size;i++){
-    energyLine[2*i] = energy[i]-0.5;
-    energyLine[2*i + 1] = energy[i]+0.5;
-    nuclearLine[2*i] = nuclear[i];
-    nuclearLine[2*i + 1] = nuclear[i];
-  }
-  TGraph *line3 = new TGraph(2*size, energyLine, nuclearLine);
-  line3->SetLineColor(kBlue);
-  line3->SetLineWidth(3);
-  line3->Draw("same");
-  //if (numFiles==2)
-  TLegend *leg3;
-  if (numFiles==2){
-    hPSDenergy1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
-    if (heat_map==1){
-      gStyle->SetPalette(kCherry);
-      hPSDenergy1->Draw("COLZ");
-    }
-    else hPSDenergy1->Draw();
-//why does it not look transparent??
-    hPSDenergy2->SetMarkerColorAlpha(kBlack, 0.5);
-    hPSDenergy2->Draw("same");
-    leg3 = new TLegend(.88,.35,.70,.11);
-    leg3->AddEntry(hPSD1, "ER", "F");
-    leg3->AddEntry(hPSD2, "NR", "F");
-    leg3->AddEntry(line3, "50% NR", "L");
+    c3->cd();
     leg3->Draw("same");
-  }
-
-  //Graph4
-  TCanvas *c4 = new TCanvas("c4", "c4");
-  hRes1->GetXaxis()->SetTitle("PSD Residual");
-  hRes1->GetYaxis()->SetTitle("number of events");
-  if (ER != "") hRes1->SetLineColor(kRed);
-  else hRes1->SetLineColor(kBlack);
-  if (numFiles==1){
-    hRes1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
-    hRes1->Draw();}
-  //for two files, NR has to be drawn first to set the y-axis size, because its peak is taller.
-  TLegend *leg4;
-  if (numFiles==2){
-    hRes1->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff);
-    hRes2->SetLineColor(kBlack);
-    hRes2->Draw();
-    leg4 = new TLegend(.88,.72,.74,.89);
-    leg4->AddEntry(hPSD1, "ER", "F");
-    leg4->AddEntry(hPSD2, "NR", "F");
+    line3->Draw("same");
+    c4->cd();
     leg4->Draw("same");
-    hRes1->Draw("same");
-  }
-
-  //Graph5 (This code is duplicated in ConstCompare.c)
-  TCanvas *c5 = new TCanvas("c5", "c5");
-  if (ER != ""){
-    //calculate error bars
-    hLeak->Sumw2();
-    hEnergy->Sumw2();
-    TH1D *hLeakEnergy = new TH1D(*hLeak);
-    hLeakEnergy->Divide(hEnergy);
-    hLeakEnergy->SetTitle("Events: "+num+", PDE: "+name_pde+", Collection Efficiency: "+name_coll_eff+", TPB: "+OnOff+", Type: "+evt_type+"R");
-    hLeakEnergy->GetXaxis()->SetTitle("Recoil energy (keV)");
-    hLeakEnergy->GetYaxis()->SetTitle("Leakage");
-    hLeakEnergy->Draw("E1");
-  }
-
-  //Fraction of events with PSD zero or 1
-  TCanvas *c6 = new TCanvas("c6", "c6");
-  double fracBadER = double(badPSD1)/double(total_evts);
-  TString name_fracBadER;
-  double fracBadNR = double(badPSD2)/double(total_evts);
-  TString name_fracBadNR;
-  if (ER != ""){
-    name_fracBadER = GetFloatAsString(fracBadER);
-    cout << "The fraction of ER events with PSD zero or one is " << fracBadER << endl;
-//why isn't this showing up?
-    TLatex text1(0.25, 0.25, "The fraction of ER events with PSD zero or one is "+name_fracBadER);
-    text1.Draw();
-  }
-  if (NR != ""){
-    name_fracBadNR = GetFloatAsString(fracBadNR);
-    cout << "The fraction of NR events with PSD zero or one is " << fracBadNR << endl;
-    TLatex text2(0.25, 0.25, "The fraction of NR events with PSD zero or one is "+name_fracBadNR);
-    text2.Draw();
-  }
 
 
-  //Step 4: Save stuff
-  gSystem->Exec("mkdir Img/"+directory);
-  TString evts;
-  if (numFiles==1) evts = evt_type+"R";
-  else if (numFiles==2) evts = "ER&NR";
-  else evts = "";
-  TString heatMap;
-  if (heat_map==0) heatMap="";
-  else if (heat_map==1) heatMap="_heatMap";
+    //Step 3: save stuff
+    gSystem->Exec("mkdir Img/"+directory);
+    TString evts;
+    if (len==1) evts = evt_type+"R";
+    else if (len==2) evts = "ER&NR";
+    else evts = "";
+    TString heatMap;
+    if (heat_map==0) heatMap="";
+    else if (heat_map==1) heatMap="_heatMap";
 
-  c1->SaveAs("Img/"+directory+"/"+evts+"__TruePSDvsRecPSD"+heatMap+".png");
-  c2->SaveAs("Img/"+directory+"/"+evts+"__PhotonsVsEnergy.png");
-  c3->SaveAs("Img/"+directory+"/"+evts+"__RecPSDvsEnergy"+heatMap+".png");
-  c4->SaveAs("Img/"+directory+"/"+evts+"__residual.png");
-  if (evt_type=='E') c5->SaveAs("Img/"+directory+"/"+evts+"__LeakageVsEnergy.png");
-  c6->SaveAs("Img/"+directory+"/"+evts+"__fracBad.png");
+    c1->SaveAs("Img/"+directory+"/"+evts+"__TruePSDvsRecPSD"+heatMap+".png");
+    c2->SaveAs("Img/"+directory+"/"+evts+"__PhotonsVsEnergy.png");
+    c3->SaveAs("Img/"+directory+"/"+evts+"__RecPSDvsEnergy"+heatMap+".png");
+    c4->SaveAs("Img/"+directory+"/"+evts+"__residual.png");
+    if (evt_type=='E') c5->SaveAs("Img/"+directory+"/"+evts+"__LeakageVsEnergy.png");
+    c6->SaveAs("Img/"+directory+"/"+evts+"__fracBad.png");
+
 }
